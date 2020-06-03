@@ -18,6 +18,18 @@ import Colors from '~/styles/colors';
 
 import { translate } from '~/locales';
 
+const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 1,
+    backgroundColor: '#E8F5FD',
+    padding: 15,
+  },
+  container: {
+    flex: 1,
+    height: '100%',
+  },
+});
+
 function MyReports({ navigation }) {
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
@@ -172,17 +184,5 @@ function MyReports({ navigation }) {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  scroll: {
-    flexGrow: 1,
-    backgroundColor: '#e8f5fd',
-    padding: 15,
-  },
-  container: {
-    flex: 1,
-    height: '100%',
-  },
-});
 
 export default MyReports;
