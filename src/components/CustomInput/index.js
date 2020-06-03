@@ -29,10 +29,10 @@ const styles = StyleSheet.create({
   },
 });
 
-export default (props) => {
+export default ({ iconName, ...props }) => {
   return (
     <View style={styles.formItem}>
-      <Icon name="person" size={20} color={Colors.main} />
+      <Icon name={iconName || 'person'} size={20} color={Colors.main} />
       <TextInput
         style={styles.input}
         {...props}

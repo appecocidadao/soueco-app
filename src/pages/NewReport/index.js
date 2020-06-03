@@ -600,6 +600,7 @@ function NewReport({ anonymous, navigation }) {
                     value={state.name}
                   />
                   <CustomInput
+                    iconName="email"
                     keyboardType="email-address"
                     autoCapitalize="none"
                     returnKeyType="next"
@@ -608,6 +609,7 @@ function NewReport({ anonymous, navigation }) {
                     value={state.email}
                   />
                   <CustomInput
+                    iconName="call"
                     keyboardType="phone-pad"
                     returnKeyType="next"
                     onChangeText={(phone) => setState({ ...state, phone })}
@@ -737,12 +739,14 @@ function NewReport({ anonymous, navigation }) {
                 <>
                   <CustomInput
                     // keyboardType="number-pad"
+                    iconName="place"
                     returnKeyType="next"
                     onChangeText={(number) => setState({ ...state, number })}
                     placeholder={translate('number')}
                     value={state.number}
                   />
                   <CustomInput
+                    iconName="place"
                     returnKeyType="next"
                     onChangeText={(place) => setState({ ...state, place })}
                     placeholder={translate('street')}
@@ -751,6 +755,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(zone) => setState({ ...state, zone })}
                     placeholder={translate('district')}
                     value={state.zone}
@@ -758,6 +763,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     // keyboardType="number-pad"
+                    iconName="place"
                     returnKeyType="next"
                     onChangeText={(cep) => setState({ ...state, cep })}
                     placeholder={translate('zipcode')}
@@ -766,6 +772,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(city) => setState({ ...state, city })}
                     placeholder={translate('city')}
                     value={state.city}
@@ -773,6 +780,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(estado) => setState({ ...state, estado })}
                     placeholder={translate('state')}
                     value={state.estado}
@@ -780,6 +788,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(reference) =>
                       setState({ ...state, reference })
                     }
@@ -791,6 +800,7 @@ function NewReport({ anonymous, navigation }) {
                 <>
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(city) => setState({ ...state, city })}
                     placeholder={translate('city')}
                     value={state.city}
@@ -798,12 +808,14 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(estado) => setState({ ...state, estado })}
                     placeholder={translate('state')}
                     value={state.estado}
                   />
                   <CustomInput
                     returnKeyType="next"
+                    iconName="place"
                     onChangeText={(reference) =>
                       setState({ ...state, reference })
                     }
@@ -1007,6 +1019,7 @@ function NewReport({ anonymous, navigation }) {
                       value={state.name}
                     />
                     <CustomInput
+                      iconName="email"
                       keyboardType="email-address"
                       autoCapitalize="none"
                       returnKeyType="next"
@@ -1015,6 +1028,7 @@ function NewReport({ anonymous, navigation }) {
                       value={state.email}
                     />
                     <CustomInput
+                      iconName="call"
                       keyboardType="phone-pad"
                       returnKeyType="next"
                       onChangeText={(phone) => setState({ ...state, phone })}
@@ -1151,12 +1165,14 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(number) => setState({ ...state, number })}
                       placeholder={translate('number')}
                       value={state.number}
+                      iconName="place"
                     />
                     <CustomInput
                       returnKeyType="next"
                       onChangeText={(place) => setState({ ...state, place })}
                       placeholder={translate('street')}
                       value={state.place}
+                      iconName="place"
                     />
 
                     <CustomInput
@@ -1164,6 +1180,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(zone) => setState({ ...state, zone })}
                       placeholder={translate('district')}
                       value={state.zone}
+                      iconName="place"
                     />
 
                     <CustomInput
@@ -1172,6 +1189,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(cep) => setState({ ...state, cep })}
                       placeholder={translate('zipcode')}
                       value={state.cep}
+                      iconName="place"
                     />
 
                     <CustomInput
@@ -1179,6 +1197,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(city) => setState({ ...state, city })}
                       placeholder={translate('city')}
                       value={state.city}
+                      iconName="place"
                     />
 
                     <CustomInput
@@ -1186,9 +1205,11 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(estado) => setState({ ...state, estado })}
                       placeholder={translate('state')}
                       value={state.estado}
+                      iconName="place"
                     />
 
                     <CustomInput
+                      iconName="place"
                       returnKeyType="next"
                       onChangeText={(reference) =>
                         setState({ ...state, reference })
@@ -1200,6 +1221,7 @@ function NewReport({ anonymous, navigation }) {
                 ) : (
                   <>
                     <CustomInput
+                      iconName="place"
                       returnKeyType="next"
                       onChangeText={(city) => setState({ ...state, city })}
                       placeholder={translate('city')}
@@ -1207,12 +1229,14 @@ function NewReport({ anonymous, navigation }) {
                     />
 
                     <CustomInput
+                      iconName="place"
                       returnKeyType="next"
                       onChangeText={(estado) => setState({ ...state, estado })}
                       placeholder={translate('state')}
                       value={state.estado}
                     />
                     <CustomInput
+                      iconName="place"
                       returnKeyType="next"
                       onChangeText={(reference) =>
                         setState({ ...state, reference })
