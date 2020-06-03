@@ -27,6 +27,7 @@ import ImageResizer from 'react-native-image-resizer';
 import Geolocation from '@react-native-community/geolocation';
 // import AddressByLocation from '~/utils/AddressByLocation';
 
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   // sendAllRequest,
   addReport,
@@ -576,8 +577,410 @@ function NewReport({ anonymous, navigation }) {
         onPressLeft={() => navigation.openDrawer()}
       />
 
-      {loading ? (
-        <Loading />
+      {loading && <Loading />}
+
+      {Platform.OS === 'ios' ? (
+        <KeyboardAwareScrollView>
+          <View style={styles.container}>
+            <Card
+              title={
+                anonymous
+                  ? translate('anonymousReport')
+                  : translate('identifiedReport')
+              }
+              iconName={anonymous ? 'lock' : 'person'}
+            >
+              {!anonymous && (
+                <>
+                  <CustomInput
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    onChangeText={(name) => setState({ ...state, name })}
+                    placeholder={translate('name')}
+                    value={state.name}
+                  />
+                  <CustomInput
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    returnKeyType="next"
+                    onChangeText={(email) => setState({ ...state, email })}
+                    placeholder={translate('email')}
+                    value={state.email}
+                  />
+                  <CustomInput
+                    keyboardType="phone-pad"
+                    returnKeyType="next"
+                    onChangeText={(phone) => setState({ ...state, phone })}
+                    placeholder={translate('phone')}
+                    value={state.phone}
+                  />
+                </>
+              )}
+            </Card>
+
+            <Card title={translate('location')} iconName="room">
+              {network.isConnected ? (
+                <ButtonIcon
+                  addStyle={{ marginBottom: 10 }}
+                  iconName="room"
+                  onPress={() => setState({ ...state, mapVisible: true })}
+                >
+                  {state.latitude !== ''
+                    ? translate('changeLocation').toUpperCase()
+                    : translate('addLocation').toUpperCase()}
+                </ButtonIcon>
+              ) : (
+                <Text style={styles.label}>
+                  {state.latitude !== ''
+                    ? translate('noConnection')
+                    : translate('searchLocation')}
+                </Text>
+              )}
+
+              {Platform.OS === 'ios' ? (
+                <>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setState({
+                        ...state,
+                        pickerUrbanVisible: true,
+                      })
+                    }
+                    style={[styles.formItem, { flexDirection: 'row' }]}
+                  >
+                    <Text style={{ flex: 1 }}>
+                      {state.urban
+                        ? translate('urbanArea')
+                        : translate('ruralArea')}
+                    </Text>
+                    <Icon
+                      name={
+                        !state.pickerUrbanVisible
+                          ? 'arrow-drop-down'
+                          : 'arrow-drop-up'
+                      }
+                      size={20}
+                      color={Colors.main}
+                    />
+                  </TouchableOpacity>
+                  <Modal
+                    transparent
+                    animationType="slide"
+                    visible={state.pickerUrbanVisible}
+                    onRequestClose={() =>
+                      setState({
+                        ...state,
+                        pickerUrbanVisible: false,
+                      })
+                    }
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        flex: 1,
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: Colors.gray,
+                          borderTopLeftRadius: 8,
+                          borderTopRightRadius: 8,
+                        }}
+                      >
+                        <Picker
+                          // style={{
+                          //   marginBottom: 30,
+                          // }}
+                          selectedValue={state.urban}
+                          mode="dropdown"
+                          onValueChange={(urban) =>
+                            setState({
+                              ...state,
+                              urban,
+                              pickerUrbanVisible: false,
+                            })
+                          }
+                        >
+                          <Picker.Item label={translate('urbanArea')} value />
+                          <Picker.Item
+                            label={translate('ruralArea')}
+                            value={false}
+                          />
+                        </Picker>
+                      </View>
+                    </View>
+                  </Modal>
+                </>
+              ) : (
+                <View
+                  style={[
+                    styles.formItem,
+                    {
+                      maxHeight: 50,
+                      justifyContent: 'center',
+                    },
+                  ]}
+                >
+                  <Picker
+                    selectedValue={state.urban}
+                    mode="dropdown"
+                    onValueChange={(urban) => setState({ ...state, urban })}
+                  >
+                    <Picker.Item label={translate('urbanArea')} value />
+                    <Picker.Item label={translate('ruralArea')} value={false} />
+                  </Picker>
+                </View>
+              )}
+
+              {state.urban ? (
+                <>
+                  <CustomInput
+                    // keyboardType="number-pad"
+                    returnKeyType="next"
+                    onChangeText={(number) => setState({ ...state, number })}
+                    placeholder={translate('number')}
+                    value={state.number}
+                  />
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(place) => setState({ ...state, place })}
+                    placeholder={translate('street')}
+                    value={state.place}
+                  />
+
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(zone) => setState({ ...state, zone })}
+                    placeholder={translate('district')}
+                    value={state.zone}
+                  />
+
+                  <CustomInput
+                    // keyboardType="number-pad"
+                    returnKeyType="next"
+                    onChangeText={(cep) => setState({ ...state, cep })}
+                    placeholder={translate('zipcode')}
+                    value={state.cep}
+                  />
+
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(city) => setState({ ...state, city })}
+                    placeholder={translate('city')}
+                    value={state.city}
+                  />
+
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(estado) => setState({ ...state, estado })}
+                    placeholder={translate('state')}
+                    value={state.estado}
+                  />
+
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(reference) =>
+                      setState({ ...state, reference })
+                    }
+                    placeholder={translate('reference')}
+                    value={state.reference}
+                  />
+                </>
+              ) : (
+                <>
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(city) => setState({ ...state, city })}
+                    placeholder={translate('city')}
+                    value={state.city}
+                  />
+
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(estado) => setState({ ...state, estado })}
+                    placeholder={translate('state')}
+                    value={state.estado}
+                  />
+                  <CustomInput
+                    returnKeyType="next"
+                    onChangeText={(reference) =>
+                      setState({ ...state, reference })
+                    }
+                    placeholder={translate('reference')}
+                    value={state.reference}
+                  />
+                </>
+              )}
+            </Card>
+
+            <Card title={translate('reportInformation')} iconName="info">
+              {Platform.OS == 'ios' ? (
+                <>
+                  <TouchableOpacity
+                    onPress={() =>
+                      setState({
+                        ...state,
+                        pickerVisible: true,
+                      })
+                    }
+                    style={[styles.formItem, { flexDirection: 'row' }]}
+                  >
+                    <Text style={{ flex: 1 }}>
+                      {state.type
+                        ? state.typeLabel
+                        : translate('selectReportType')}
+                    </Text>
+                    <Icon
+                      name={
+                        !state.pickerVisible
+                          ? 'arrow-drop-down'
+                          : 'arrow-drop-up'
+                      }
+                      size={20}
+                      color={Colors.main}
+                    />
+                  </TouchableOpacity>
+                  <Modal
+                    transparent
+                    animationType="slide"
+                    visible={state.pickerVisible}
+                    onRequestClose={() =>
+                      setState({
+                        ...state,
+                        pickerVisible: false,
+                      })
+                    }
+                  >
+                    <View
+                      style={{
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        flex: 1,
+                        justifyContent: 'flex-end',
+                      }}
+                    >
+                      <View
+                        style={{
+                          backgroundColor: Colors.gray,
+                          borderTopLeftRadius: 8,
+                          borderTopRightRadius: 8,
+                        }}
+                      >
+                        <Picker
+                          selectedValue={state.type}
+                          mode="dropdown"
+                          onValueChange={(type, idx) =>
+                            setState({
+                              ...state,
+                              type,
+                              typeLabel: typesReports[idx].label,
+                              pickerVisible: false,
+                            })
+                          }
+                        >
+                          {typesReports.map((item) => (
+                            <Picker.Item
+                              key={item.value}
+                              label={item.label}
+                              value={item.value}
+                            />
+                          ))}
+                        </Picker>
+                      </View>
+                    </View>
+                  </Modal>
+                </>
+              ) : (
+                <View
+                  style={[
+                    styles.formItem,
+                    {
+                      maxHeight: 50,
+                      justifyContent: 'center',
+                    },
+                  ]}
+                >
+                  <Picker
+                    selectedValue={state.type}
+                    mode="dropdown"
+                    onValueChange={(type, idx) =>
+                      setState({
+                        ...state,
+                        type,
+                        typeLabel: typesReports[idx].label,
+                        pickerVisible: false,
+                      })
+                    }
+                  >
+                    {typesReports.map((item) => (
+                      <Picker.Item
+                        key={item.value}
+                        label={item.label}
+                        value={item.value}
+                      />
+                    ))}
+                  </Picker>
+                </View>
+              )}
+
+              <TextInput
+                style={[styles.formItem, styles.description]}
+                returnKeyType="done"
+                onChangeText={(description) =>
+                  setState({ ...state, description })
+                }
+                blurOnSubmit
+                placeholder={translate('reportDescription')}
+                multiline
+                numberOfLines={5}
+                value={state.description}
+              />
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.selectedImages}
+              >
+                {state.filePath.map((filePath, index) =>
+                  !filePath ? (
+                    <TouchableOpacity
+                      key={index}
+                      onLongPress={() => deleteImage(index)}
+                      onPress={() => openPicker(index)}
+                      style={styles.imageCircle}
+                    >
+                      <Icon name="camera-alt" size={25} color="#fff" />
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => openPicker(index)}
+                    >
+                      <Image
+                        source={{ uri: filePath.uri }}
+                        style={styles.imageCircle}
+                      />
+                    </TouchableOpacity>
+                  )
+                )}
+              </ScrollView>
+
+              {/* <ButtonIcon iconName='camera-alt'
+								onPress={() => openPicker()}
+								addStyle={{ marginBottom: 10 }}>
+								<Text style={{ color: '#fff', marginLeft: 5 }}>{translate('addImage').toUpperCase()}*</Text>
+							</ButtonIcon> */}
+            </Card>
+
+            <ButtonIcon
+              addStyle={{ marginHorizontal: 15, marginTop: 10 }}
+              iconName="send"
+              onPress={() => handleSubmit()}
+            >
+              {translate('sendReport').toUpperCase()}
+            </ButtonIcon>
+          </View>
+        </KeyboardAwareScrollView>
       ) : (
         <KeyboardAvoidingView
           style={{ flex: 1 }}
