@@ -112,7 +112,10 @@ function MyReports({ navigation }) {
         }}
       />
 
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <ScrollView
+        style={{ backgroundColor: '#E8F5FD' }}
+        contentContainerStyle={styles.scroll}
+      >
         <Card title={translate('sentReports')}>
           {!network.isConnected ? (
             <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>

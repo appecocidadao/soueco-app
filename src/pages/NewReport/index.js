@@ -580,7 +580,7 @@ function NewReport({ anonymous, navigation }) {
       {loading && <Loading />}
 
       {Platform.OS === 'ios' ? (
-        <KeyboardAwareScrollView>
+        <KeyboardAwareScrollView style={{ backgroundColor: '#e8f5fd' }}>
           <View style={styles.container}>
             <Card
               title={
