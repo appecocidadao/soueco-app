@@ -50,7 +50,7 @@ export default function createRouter() {
         options={{
           title: translate('anonymousReport'),
           drawerIcon: ({ color }) => (
-            <Icon name="person" size={20} color={color} />
+            <Icon name="lock" size={20} color={color} />
           ),
         }}
       >

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TextInput } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import Colors from '~/styles/colors';
 
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
 export default ({ iconName, ...props }) => {
   return (
     <View style={styles.formItem}>
-      <Icon name={iconName || 'person'} size={20} color={Colors.main} />
+      <Icon name={iconName || 'account'} size={20} color={Colors.main} />
       <TextInput
         style={styles.input}
         {...props}

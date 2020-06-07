@@ -609,7 +609,7 @@ function NewReport({ anonymous, navigation }) {
                     value={state.email}
                   />
                   <CustomInput
-                    iconName="call"
+                    iconName="phone"
                     keyboardType="phone-pad"
                     returnKeyType="next"
                     onChangeText={(phone) => setState({ ...state, phone })}
@@ -739,14 +739,14 @@ function NewReport({ anonymous, navigation }) {
                 <>
                   <CustomInput
                     // keyboardType="number-pad"
-                    iconName="place"
+                    iconName="numeric"
                     returnKeyType="next"
                     onChangeText={(number) => setState({ ...state, number })}
                     placeholder={translate('number')}
                     value={state.number}
                   />
                   <CustomInput
-                    iconName="place"
+                    iconName="road-variant"
                     returnKeyType="next"
                     onChangeText={(place) => setState({ ...state, place })}
                     placeholder={translate('street')}
@@ -755,7 +755,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="view-dashboard-variant"
                     onChangeText={(zone) => setState({ ...state, zone })}
                     placeholder={translate('district')}
                     value={state.zone}
@@ -763,7 +763,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     // keyboardType="number-pad"
-                    iconName="place"
+                    iconName="deskphone"
                     returnKeyType="next"
                     onChangeText={(cep) => setState({ ...state, cep })}
                     placeholder={translate('zipcode')}
@@ -772,7 +772,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="home-city"
                     onChangeText={(city) => setState({ ...state, city })}
                     placeholder={translate('city')}
                     value={state.city}
@@ -780,7 +780,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="city"
                     onChangeText={(estado) => setState({ ...state, estado })}
                     placeholder={translate('state')}
                     value={state.estado}
@@ -788,7 +788,7 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="map-marker-radius"
                     onChangeText={(reference) =>
                       setState({ ...state, reference })
                     }
@@ -800,7 +800,7 @@ function NewReport({ anonymous, navigation }) {
                 <>
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="home-city"
                     onChangeText={(city) => setState({ ...state, city })}
                     placeholder={translate('city')}
                     value={state.city}
@@ -808,14 +808,14 @@ function NewReport({ anonymous, navigation }) {
 
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="city"
                     onChangeText={(estado) => setState({ ...state, estado })}
                     placeholder={translate('state')}
                     value={state.estado}
                   />
                   <CustomInput
                     returnKeyType="next"
-                    iconName="place"
+                    iconName="map-marker-radius"
                     onChangeText={(reference) =>
                       setState({ ...state, reference })
                     }
@@ -1028,7 +1028,7 @@ function NewReport({ anonymous, navigation }) {
                       value={state.email}
                     />
                     <CustomInput
-                      iconName="call"
+                      iconName="phone"
                       keyboardType="phone-pad"
                       returnKeyType="next"
                       onChangeText={(phone) => setState({ ...state, phone })}
@@ -1165,14 +1165,14 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(number) => setState({ ...state, number })}
                       placeholder={translate('number')}
                       value={state.number}
-                      iconName="place"
+                      iconName="numeric"
                     />
                     <CustomInput
                       returnKeyType="next"
                       onChangeText={(place) => setState({ ...state, place })}
                       placeholder={translate('street')}
                       value={state.place}
-                      iconName="place"
+                      iconName="road-variant"
                     />
 
                     <CustomInput
@@ -1180,7 +1180,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(zone) => setState({ ...state, zone })}
                       placeholder={translate('district')}
                       value={state.zone}
-                      iconName="place"
+                      iconName="view-dashboard-variant"
                     />
 
                     <CustomInput
@@ -1189,7 +1189,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(cep) => setState({ ...state, cep })}
                       placeholder={translate('zipcode')}
                       value={state.cep}
-                      iconName="place"
+                      iconName="deskphone"
                     />
 
                     <CustomInput
@@ -1197,7 +1197,7 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(city) => setState({ ...state, city })}
                       placeholder={translate('city')}
                       value={state.city}
-                      iconName="place"
+                      iconName="home-city"
                     />
 
                     <CustomInput
@@ -1205,11 +1205,11 @@ function NewReport({ anonymous, navigation }) {
                       onChangeText={(estado) => setState({ ...state, estado })}
                       placeholder={translate('state')}
                       value={state.estado}
-                      iconName="place"
+                      iconName="city"
                     />
 
                     <CustomInput
-                      iconName="place"
+                      iconName="map-marker-radius"
                       returnKeyType="next"
                       onChangeText={(reference) =>
                         setState({ ...state, reference })
@@ -1221,7 +1221,7 @@ function NewReport({ anonymous, navigation }) {
                 ) : (
                   <>
                     <CustomInput
-                      iconName="place"
+                      iconName="home-city"
                       returnKeyType="next"
                       onChangeText={(city) => setState({ ...state, city })}
                       placeholder={translate('city')}
@@ -1229,14 +1229,14 @@ function NewReport({ anonymous, navigation }) {
                     />
 
                     <CustomInput
-                      iconName="place"
+                      iconName="city"
                       returnKeyType="next"
                       onChangeText={(estado) => setState({ ...state, estado })}
                       placeholder={translate('state')}
                       value={state.estado}
                     />
                     <CustomInput
-                      iconName="place"
+                      iconName="map-marker-radius"
                       returnKeyType="next"
                       onChangeText={(reference) =>
                         setState({ ...state, reference })
