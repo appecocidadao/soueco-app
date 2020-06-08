@@ -67,7 +67,7 @@ export default function createRouter() {
         }}
       />
 
-      <Drawer.Screen
+      {/* <Drawer.Screen
         name="TCEAmbiental"
         component={TCEAmbiental}
         options={{
@@ -87,7 +87,7 @@ export default function createRouter() {
             <Icon name="info" size={20} color={color} />
           ),
         }}
-      />
+      /> */}
     </Drawer.Navigator>
   );
 }

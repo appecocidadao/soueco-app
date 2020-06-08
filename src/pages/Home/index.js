@@ -21,7 +21,9 @@ import ModalPrivacyPolicy from '~/components/Modals/PrivacyPolicy';
 import Loading from '~/components/Loading';
 
 import footer from '../../../assets/footeruea.png';
-import bannerTransparent1079966 from '../../../assets/background-transparent-1079-966.png';
+// import bannerTransparent1079966 from '../../../assets/background-transparent-1079-966.png';
+
+import bannerTransparent1079966 from '../../../assets/header.png';
 
 import { sendAllRequest } from '~/store/modules/reports/actions';
 import { checkConnection } from '~/store/modules/network/actions';
@@ -96,7 +98,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     width: Dimensions.get('window').width,
     height: undefined,
-    aspectRatio: 1079 / 966,
+    // aspectRatio: 1079 / 966,
+    aspectRatio: 431 / 135,
 
     backgroundColor: '#f2fafd',
   },
