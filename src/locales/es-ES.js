@@ -34,6 +34,7 @@ export default {
   addImage: 'Agregar imagen',
   sendReport: 'Enviar denuncia',
   noInternetConnection: 'Sin conexión a Internet.',
+  noReportSent: 'No se envió informe',
   noArchivedReports: 'Sin denuncias archivadas.',
   incompleteReport: '¡Denuncia incompleta!',
   fillAllFields: 'Por favor, preencha todos los campos obrigatorios.',

@@ -33,6 +33,7 @@ export default {
   addImage: 'Add image',
   sendReport: 'Send report',
   noInternetConnection: 'No Internet connection.',
+  noReportSent: 'No report sent',
   noArchivedReports: 'No archived reports.',
   incompleteReport: 'Report not complete!',
   fillAllFields: 'Please, fill all required fields.',

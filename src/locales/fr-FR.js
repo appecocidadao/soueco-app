@@ -37,6 +37,7 @@ export default {
   addImage: 'Ajouter une image',
   sendReport: 'Soumettre le rapport',
   noInternetConnection: 'Pas de connexion Internet.',
+  noReportSent: 'Aucun rapport envoyé',
   noArchivedReports: "Vous n'avez déposé aucun rapport.",
   incompleteReport: 'Rapports incomplets!',
   fillAllFields: 'Veuillez remplir tous les champs requis.',

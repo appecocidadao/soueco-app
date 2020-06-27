@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React, { Component } from 'react';
-import codePush from 'react-native-code-push';
 import OneSignal from 'react-native-onesignal';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
@@ -16,6 +15,8 @@ import { store, persistor } from './store';
 import App from './App';
 
 import colors from '~/styles/colors';
+// import codePush from 'react-native-code-push';
+const codePush = require('react-native-code-push');
 
 const codePushOptions = {
   checkFrequency: codePush.CheckFrequency.ON_APP_RESUME,

@@ -142,7 +142,7 @@ function MyReports({ navigation }) {
             />
           ) : (
             <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>
-              {translate('noInternetConnection')}
+              {translate('noReportSent')}
             </Text>
           )}
         </Card>
