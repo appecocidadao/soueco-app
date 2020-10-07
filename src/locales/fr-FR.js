@@ -61,6 +61,10 @@ export default {
   reportingLocation: 'Lieu de déclaration',
   connectionError: 'Erreur de connexion!',
   checkConnectionInternet: 'Vérifiez votre connection internet',
+  connectionErrorForAddress:
+    "L'emplacement sur la carte a été enregistré! Cependant, la détection d'adresse automatique a échoué.",
+  checkConnectionInternetForAddress:
+    "Veuillez saisir les données d'adresse manuellement après avoir confirmé l'emplacement",
   locationError: "Erreur d'emplacement",
   checkConnectionGPS: 'Vérifiez votre connexion GPS',
   failGetLocation:

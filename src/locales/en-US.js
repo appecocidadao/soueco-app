@@ -59,6 +59,10 @@ export default {
   checkConnectionInternet: 'Check your internet connection',
   locationError: 'Location error',
   checkConnectionGPS: 'Check your GPS connection',
+  connectionErrorForAddress:
+    'The location on the map has been saved! However, address detection failed.',
+  checkConnectionInternetForAddress:
+    'Please enter the address data manually after confirming the location',
   failGetLocation: "We couldn't find your location, try again ...",
   reported: 'Reported!',
   reportedDescription: 'Your report has been successfully sent!',

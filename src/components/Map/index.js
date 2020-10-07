@@ -60,7 +60,13 @@ export default function Map({ urban, closeModal, onFillLocation }) {
     setState({ ...state, marker, latitude, longitude });
 
     if (network.isConnected) {
-      setState({ ...state, activityIndicator: true });
+      setState({
+        ...state,
+        marker,
+        latitude,
+        longitude,
+        activityIndicator: true,
+      });
 
       try {
         const address = await AddressByLocation({ latitude, longitude });
@@ -75,11 +81,17 @@ export default function Map({ urban, closeModal, onFillLocation }) {
         });
       } catch (err) {
         Alert.alert(
-          translate('connectionError'),
-          translate('checkConnectionInternet')
+          translate('connectionErrorForAddress'),
+          translate('checkConnectionInternetForAddress')
         );
-        setState({ ...state, activityIndicator: false });
-        closeModal();
+        setState({
+          ...state,
+          marker,
+          latitude,
+          longitude,
+          activityIndicator: false,
+        });
+        // closeModal();
       }
     }
   };
