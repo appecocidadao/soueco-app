@@ -27,14 +27,14 @@ export function* sendReports() {
         info.longitude &&
         info.latitude !== '' &&
         info.longitude !== '' &&
-        (info.city === '' || info.estado === '')
+        (info.city === '' || info.state === '')
       ) {
         const address = yield AddressByLocation({
           latitude: info.latitude,
           longitude: info.longitude,
         });
 
-        info.estado = address.estado;
+        info.state = address.state;
         info.city = address.city;
       }
 
@@ -52,7 +52,7 @@ export function* sendReports() {
       report.append('district', info.zone);
       report.append('number', info.number);
       report.append('zipcode', info.cep);
-      report.append('state', info.estado);
+      report.append('state', info.state);
       report.append('city', info.city);
       report.append('reference', info.reference);
       report.append('latitude', info.latitude);

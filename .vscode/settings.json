@@ -1,0 +1,11 @@
+{
+  "search.exclude": {
+    "**/node_modules": false
+  },
+  "npm.exclude": "",
+  "files.watcherExclude": {
+    "**/node_modules/**": false
+  },
+  "timeline.excludeSources": [],
+  "markdown.extension.completion.respectVscodeSearchExclude": false
+}

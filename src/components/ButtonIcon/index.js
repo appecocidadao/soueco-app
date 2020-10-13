@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import Colors from '~/styles/colors';
@@ -10,6 +11,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
+  },
+  container: {
+    height: 51,
+    backgroundColor: Colors.main,
   },
   button: {
     height: 50,
@@ -32,10 +37,12 @@ const styles = StyleSheet.create({
 });
 
 export default ({ iconName, children, onPress, addStyle }) => (
-  <TouchableOpacity onPress={onPress} style={[styles.button, addStyle]}>
-    <View style={styles.content}>
-      <Icon size={20} name={iconName} color={Colors.white} />
-      <Text style={styles.buttonText}>{children}</Text>
-    </View>
-  </TouchableOpacity>
+  <View style={[styles.container, addStyle]}>
+    <TouchableOpacity onPress={onPress} style={[styles.button]}>
+      <View style={styles.content}>
+        <Icon size={20} name={iconName} color={Colors.white} />
+        <Text style={styles.buttonText}>{children}</Text>
+      </View>
+    </TouchableOpacity>
+  </View>
 );

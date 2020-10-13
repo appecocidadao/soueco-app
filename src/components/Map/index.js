@@ -1,15 +1,6 @@
 /* eslint-disable no-nested-ternary */
 import React, { useState, useEffect } from 'react';
-import {
-  Platform,
-  Alert,
-  Text,
-  View,
-  Modal,
-  ActivityIndicator,
-  StatusBar,
-  Button,
-} from 'react-native';
+import { Platform, Alert, View } from 'react-native';
 
 import MapView, { Marker } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
@@ -17,6 +8,7 @@ import Geolocation from '@react-native-community/geolocation';
 import { useSelector } from 'react-redux';
 // import Geocoder from 'react-native-geocoding';
 
+import Colors from '~/styles/colors';
 import ButtonIcon from '~/components/ButtonIcon';
 import Loading from '~/components/Loading';
 import AddressByLocation from '~/utils/AddressByLocation';
@@ -29,7 +21,7 @@ Geolocation.setRNConfiguration({ authorizationLevel: 'always' });
 export default function Map({ urban, closeModal, onFillLocation }) {
   const network = useSelector((state) => state.network);
 
-  const [state, setState] = useState({
+  const [data, setData] = useState({
     region: null,
     markers: null,
     address: '',
@@ -41,7 +33,7 @@ export default function Map({ urban, closeModal, onFillLocation }) {
     place: '',
     city: '',
     cep: '',
-    estado: '',
+    state: '',
   });
 
   const markLocation = async (e) => {
@@ -57,16 +49,16 @@ export default function Map({ urban, closeModal, onFillLocation }) {
       description: translate('reportingLocation'),
     };
 
-    setState({ ...state, marker, latitude, longitude });
+    setData({ ...data, marker, latitude, longitude });
 
     if (network.isConnected) {
-      setState({ ...state, activityIndicator: true });
+      setData({ ...data, activityIndicator: true });
 
       try {
         const address = await AddressByLocation({ latitude, longitude });
 
-        setState({
-          ...state,
+        setData({
+          ...data,
           marker,
           activityIndicator: false,
           ...address,
@@ -78,7 +70,7 @@ export default function Map({ urban, closeModal, onFillLocation }) {
           translate('connectionError'),
           translate('checkConnectionInternet')
         );
-        setState({ ...state, activityIndicator: false });
+        setData({ ...data, activityIndicator: false });
         closeModal();
       }
     }
@@ -86,12 +78,12 @@ export default function Map({ urban, closeModal, onFillLocation }) {
 
   useEffect(() => {
     async function loadPosition() {
-      setState({ ...state, activityIndicator: true });
+      setData({ ...data, activityIndicator: true });
 
       Geolocation.getCurrentPosition(
         async ({ coords: { latitude, longitude } }) => {
-          setState({
-            ...state,
+          setData({
+            ...data,
             region: {
               latitude,
               longitude,
@@ -105,7 +97,7 @@ export default function Map({ urban, closeModal, onFillLocation }) {
             translate('locationError'),
             translate('checkConnectionGPS')
           );
-          setState({ ...state, activityIndicator: false });
+          setData({ ...data, activityIndicator: false });
           closeModal();
         },
         {
@@ -115,7 +107,7 @@ export default function Map({ urban, closeModal, onFillLocation }) {
         }
       );
 
-      setState({ ...state, activityIndicator: false });
+      setData({ ...data, activityIndicator: false });
     }
 
     loadPosition();
@@ -130,31 +122,35 @@ export default function Map({ urban, closeModal, onFillLocation }) {
     zone,
     city,
     cep,
-    estado,
-  } = state;
+    state,
+  } = data;
 
   return (
-    <View style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#04884E" barStyle="light-content" />
-
-      {state.activityIndicator ? (
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: Colors.primary,
+        justifyContent: 'center',
+      }}
+    >
+      {data.activityIndicator ? (
         <Loading />
       ) : Platform.OS === 'ios' ? (
         <MapView
           // style={{ flex: 1 }}
           style={{ flex: 3 }}
           initialRegion={
-            state.marker ? { ...region, ...state.marker.latlng } : region
+            data.marker ? { ...region, ...data.marker.latlng } : region
           }
           showsUserLocation
           loadingEnabled
           onPress={(e) => markLocation(e)}
         >
-          {state.marker ? (
+          {data.marker ? (
             <Marker
-              coordinate={state.marker.latlng}
-              title={state.marker.title}
-              description={state.marker.description}
+              coordinate={data.marker.latlng}
+              title={data.marker.title}
+              description={data.marker.description}
             />
           ) : null}
         </MapView>
@@ -164,17 +160,17 @@ export default function Map({ urban, closeModal, onFillLocation }) {
           provider="google"
           style={{ flex: 3 }}
           initialRegion={
-            state.marker ? { ...region, ...state.marker.latlng } : region
+            data.marker ? { ...region, ...data.marker.latlng } : region
           }
           showsUserLocation
           loadingEnabled
           onPress={(e) => markLocation(e)}
         >
-          {state.marker ? (
+          {data.marker ? (
             <Marker
-              coordinate={state.marker.latlng}
-              title={state.marker.title}
-              description={state.marker.description}
+              coordinate={data.marker.latlng}
+              title={data.marker.title}
+              description={data.marker.description}
             />
           ) : null}
         </MapView>
@@ -190,7 +186,7 @@ export default function Map({ urban, closeModal, onFillLocation }) {
             zone,
             city,
             cep,
-            estado
+            state
           )
         }
       >

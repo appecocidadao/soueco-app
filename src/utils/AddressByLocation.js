@@ -56,7 +56,7 @@ export default async ({ latitude, longitude }) => {
       return n;
     }, '');
 
-    const estado = response.results.reduce((n, result) => {
+    const state = response.results.reduce((n, result) => {
       if (n !== '') return n;
 
       const address = result.address_components.find((component) =>
@@ -80,7 +80,7 @@ export default async ({ latitude, longitude }) => {
       return n;
     }, '');
 
-    return { number, place, zone, city, estado, cep, latitude, longitude };
+    return { number, place, zone, city, state, cep, latitude, longitude };
   } catch (e) {
     throw new Error('It was not possible to get the address data');
   }
