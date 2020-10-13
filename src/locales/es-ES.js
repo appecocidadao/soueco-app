@@ -59,6 +59,10 @@ export default {
   reportingLocation: 'Ubicación de informes',
   connectionError: 'Erro de conexão!',
   checkConnectionInternet: '¡Error de conexión!',
+  connectionErrorForAddress:
+    '¡Se ha guardado la ubicación en el mapa! Sin embargo, la detección de la dirección falló.',
+  checkConnectionInternetForAddress:
+    'Ingrese los datos de la dirección manualmente después de confirmar la ubicación',
   locationError: 'Error de Localização',
   checkConnectionGPS: 'Error de ubicación',
   failGetLocation: 'No pudimos encontrar tu ubicación, vuelve a intentarlo ...',

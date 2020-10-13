@@ -52,7 +52,13 @@ export default function Map({ urban, closeModal, onFillLocation }) {
     setData({ ...data, marker, latitude, longitude });
 
     if (network.isConnected) {
-      setData({ ...data, activityIndicator: true });
+      setData({
+        ...data,
+        marker,
+        latitude,
+        longitude,
+        activityIndicator: true,
+      });
 
       try {
         const address = await AddressByLocation({ latitude, longitude });
@@ -67,11 +73,17 @@ export default function Map({ urban, closeModal, onFillLocation }) {
         });
       } catch (err) {
         Alert.alert(
-          translate('connectionError'),
-          translate('checkConnectionInternet')
+          translate('connectionErrorForAddress'),
+          translate('checkConnectionInternetForAddress')
         );
-        setData({ ...data, activityIndicator: false });
-        closeModal();
+        setData({
+          ...data,
+          marker,
+          latitude,
+          longitude,
+          activityIndicator: false,
+        });
+        // closeModal();
       }
     }
   };

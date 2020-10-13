@@ -57,6 +57,10 @@ export default {
   phone: 'Contato*',
   reportingLocation: 'Local da denúncia',
   connectionError: 'Erro de conexão!',
+  connectionErrorForAddress:
+    'A localização no mapa foi salva! Porém, houve falha na detecção automática de endereço.',
+  checkConnectionInternetForAddress:
+    'Por favor, insira manualmente os dados de endereço após a confirmação do local',
   checkConnectionInternet: 'Verifique sua conexão com a internet',
   locationError: 'Error de Localização',
   checkConnectionGPS: 'Verifique sua conexão com o GPS',
