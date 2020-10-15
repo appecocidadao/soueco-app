@@ -1,33 +1,36 @@
 /* eslint-disable no-unused-expressions */
 /* eslint-disable react/prop-types */
-import React, { useState, useEffect, useMemo } from 'react';
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from 'react';
 import {
   Alert,
   Image,
   Text,
   View,
-  TextInput,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
   StatusBar,
-  Picker,
   Modal,
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { useSelector, useDispatch } from 'react-redux';
-
+import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
 // import AsyncStorage from '@react-native-community/async-storage';
-
+import { Form } from '@unform/mobile';
 import Geolocation from '@react-native-community/geolocation';
 // import AddressByLocation from '~/utils/AddressByLocation';
 
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import {
   // sendAllRequest,
   addReport,
@@ -38,7 +41,7 @@ import Map from '~/components/Map';
 import Header from '~/components/Header';
 import Card from '~/components/Card';
 import ButtonIcon from '~/components/ButtonIcon';
-import CustomInput from '~/components/CustomInput';
+import Input from '~/components/Input';
 
 import Colors from '~/styles/colors';
 
@@ -46,26 +49,33 @@ import api from '~/services/api';
 import Loading from '~/components/Loading';
 
 import { translate } from '~/locales';
+import Dropdown from '~/components/Dropdown';
+import OptionsZone from '~/components/OptionsZone';
 
 Geolocation.setRNConfiguration({ authorizationLevel: 'always' });
 
 function NewReport({ anonymous, navigation }) {
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
+  const formRef = useRef(null);
+  const refsVideos = useRef([
+    React.createRef(),
+    React.createRef(),
+    React.createRef(),
+  ]);
 
   const network = useSelector((state) => state.network);
 
-  const [state, setState] = useState({
-    pickerUrbanVisible: false,
-    pickerVisible: false,
+  const [isUrban, setIsUrban] = useState(true);
 
+  const [data, setData] = useState({
     mapVisible: false,
 
     activityIndicator: false,
 
-    name: '',
-    email: '',
-    phone: '',
+    // name: '',
+    // email: '',
+    // phone: '',
 
     urban: true,
     place: '',
@@ -73,23 +83,20 @@ function NewReport({ anonymous, navigation }) {
     number: '',
     cep: '',
     city: '',
-    estado: '',
+    state: '',
     reference: '',
     latitude: '',
     longitude: '',
 
     type: '',
     description: '',
-    filePath: [null, null, null],
+    prevMedias: [null, null, null],
   });
 
-  const [image, setImage] = useState([null, null, null]);
+  const [medias, setMedias] = useState([null, null, null]);
   const [loading, setLoading] = useState(false);
 
-  const initialState = {
-    pickerUrbanVisible: false,
-    pickerVisible: false,
-
+  const initialData = {
     mapVisible: false,
 
     activityIndicator: false,
@@ -104,14 +111,14 @@ function NewReport({ anonymous, navigation }) {
     number: '',
     cep: '',
     // city: '',
-    // estado: '',
+    // state: '',
     reference: '',
     // latitude: '',
     // longitude: '',
 
     type: '',
     description: '',
-    filePath: [null, null, null],
+    prevMedias: [null, null, null],
   };
 
   useEffect(() => {
@@ -125,13 +132,13 @@ function NewReport({ anonymous, navigation }) {
 
       Geolocation.getCurrentPosition(
         async ({ coords: { latitude, longitude } }) => {
-          setState({
-            ...state,
+          setData((prevData) => ({
+            ...prevData,
             latitude,
             longitude,
-          });
+          }));
         },
-        (err) => {
+        (_err) => {
           Alert.alert(
             translate('locationError'),
             translate('checkConnectionGPS')
@@ -156,10 +163,6 @@ function NewReport({ anonymous, navigation }) {
 
   const typesReports = useMemo(() => {
     return [
-      {
-        label: translate('selectReportType'),
-        value: '',
-      },
       {
         label: translate('trash'),
         value: 'Lixo',
@@ -203,10 +206,11 @@ function NewReport({ anonymous, navigation }) {
     zone,
     city,
     cep,
-    estado
+    state
   ) => {
-    setState({
-      ...state,
+    console.log('que pohha');
+    setData((prevData) => ({
+      ...prevData,
       latitude,
       longitude,
 
@@ -214,8 +218,19 @@ function NewReport({ anonymous, navigation }) {
       zone,
       city,
       cep,
-      estado,
+      state,
       mapVisible: false,
+    }));
+
+    formRef.current.setData({
+      latitude,
+      longitude,
+
+      place,
+      zone,
+      city,
+      cep,
+      state,
     });
   };
 
@@ -242,13 +257,13 @@ function NewReport({ anonymous, navigation }) {
       number,
       cep,
       city,
-      estado,
+      state,
       reference,
       type,
       description,
       latitude,
       longitude,
-    } = state;
+    } = data;
 
     if (!anonymous && (!email || !name || !phone)) {
       Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
@@ -266,10 +281,10 @@ function NewReport({ anonymous, navigation }) {
                 text: translate('yes'),
                 onPress: async () => {
                   resolve(true);
-                  setState({
-                    ...state,
+                  setData((prevData) => ({
+                    ...prevData,
                     number: translate('none'),
-                  });
+                  }));
                 },
               },
               {
@@ -294,7 +309,7 @@ function NewReport({ anonymous, navigation }) {
       return;
     }
 
-    if (!city || !estado) {
+    if (!city || !state) {
       Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
       return;
     }
@@ -304,7 +319,7 @@ function NewReport({ anonymous, navigation }) {
       return;
     }
 
-    if (!image[0] && !image[1] && !image[2]) {
+    if (!medias[0] && !medias[1] && !medias[2]) {
       Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
       return;
     }
@@ -314,7 +329,7 @@ function NewReport({ anonymous, navigation }) {
     //   longitude &&
     //   latitude !== '' &&
     //   longitude !== '' &&
-    //   (city === '' || estado === '')
+    //   (city === '' || state === '')
     // ) {
     //   AddressByLocation({ latitude, longitude }).then((address) => {
     //
@@ -325,11 +340,11 @@ function NewReport({ anonymous, navigation }) {
     if (!latitude || !longitude || latitude === '' || longitude === '') {
       Geolocation.getCurrentPosition(
         async ({ coords: { latitude, longitude } }) => {
-          setState({
-            ...state,
+          setData((prevData) => ({
+            ...prevData,
             latitude,
             longitude,
-          });
+          }));
         },
         (err) => {
           Alert.alert(
@@ -372,7 +387,7 @@ function NewReport({ anonymous, navigation }) {
       report.append('district', zone);
       report.append('number', number);
       report.append('zipcode', cep);
-      report.append('state', estado);
+      report.append('state', state);
       report.append('city', city);
       report.append('reference', reference);
       report.append('latitude', latitude);
@@ -381,16 +396,16 @@ function NewReport({ anonymous, navigation }) {
 
       report.append('type', type);
       report.append('description', description);
-      report.append('file', image[0]);
-      report.append('file', image[1]);
-      report.append('file', image[2]);
+      report.append('file', medias[0]);
+      report.append('file', medias[1]);
+      report.append('file', medias[2]);
 
       const response = await api.post('/denunciations', report);
 
       // await pushReportCode(response.data.denunciation.code);
 
-      setState(initialState);
-      setImage([null, null, null]);
+      setData(initialData);
+      setMedias([null, null, null]);
       setLoading(false);
 
       Alert.alert(translate('reported'), translate('reportedDescription'));
@@ -406,21 +421,14 @@ function NewReport({ anonymous, navigation }) {
           onPress: async () => {
             setLoading(true);
 
-            const {
-              pickerUrbanVisible,
-              pickerVisible,
-              mapVisible,
-              activityIndicator,
-              filePath,
-              ...rest
-            } = state;
+            const { mapVisible, activityIndicator, prevMedias, ...rest } = data;
 
-            rest.image = image;
+            rest.medias = medias;
             rest.anonymous = anonymous;
             rest.timestamp = new Date().toISOString();
 
-            setState(initialState);
-            setImage([null, null, null]);
+            setData(initialData);
+            setMedias([null, null, null]);
 
             dispatch(addReport(rest));
             navigation.navigate('Home');
@@ -473,8 +481,8 @@ function NewReport({ anonymous, navigation }) {
         {
           text: translate('noDelete'),
           onPress: () => {
-            setState(initialState);
-            setImage([null, null, null]);
+            setData(initialData);
+            setMedias([null, null, null]);
             navigation.navigate('Home');
           },
           style: 'cancel',
@@ -483,65 +491,18 @@ function NewReport({ anonymous, navigation }) {
     }
   };
 
-  const openPicker = (index) => {
-    const options = {
-      title: 'Select image',
-      storageOptions: {
-        skipBackup: true,
-        path: 'images',
-      },
-    };
-
-    ImagePicker.showImagePicker(options, (response) => {
-      if (response.error) {
-        Alert.alert('Erro!', response.error);
-        // eslint-disable-next-line no-empty
-      } else if (response.didCancel) {
-      } else {
-        const source = response;
-
-        const tempFilePath = state.filePath;
-
-        tempFilePath[index] = source;
-
-        setState({ ...state, filePath: tempFilePath });
-
-        ImageResizer.createResizedImage(response.uri, 500, 500, 'JPEG', 70)
-          .then(({ uri }) => {
-            const prefix = new Date().getTime();
-
-            const img = {
-              uri,
-              type: response.type,
-              name: `${prefix}.jpg`,
-            };
-
-            const tempImage = image;
-
-            tempImage[index] = img;
-
-            setImage(tempImage);
-          })
-          .catch((err) => {
-            Alert.alert(
-              translate('imageError'),
-              translate('imageErrorDescription')
-            );
-          });
-      }
-    });
-  };
-
   const deleteImage = (index) => {
     Alert.alert(translate('Attention'), translate('msgDeleteImg'), [
       {
         text: translate('yesDelete'),
         onPress: () => {
-          const tmp = image;
-
+          let tmp = [...medias];
           tmp[index] = null;
+          setMedias(tmp);
 
-          setImage(tmp);
+          tmp = [...data.prevMedias];
+          tmp[index] = null;
+          setData((prev) => ({ ...prev, prevMedias: tmp }));
         },
       },
       {
@@ -551,19 +512,121 @@ function NewReport({ anonymous, navigation }) {
     ]);
   };
 
+  const openPicker = (index) => {
+    let options = {
+      title: 'Inserir evidência',
+      cancelButtonTitle: 'Cancelar',
+      takePhotoButtonTitle: 'Abrir câmera',
+      chooseFromLibraryButtonTitle: 'Galeria',
+
+      storageOptions: {
+        skipBackup: true,
+        path: 'Evidências Sou Eco!',
+      },
+      mediaType: 'mixed',
+      durationLimit: 10,
+    };
+
+    if (data.prevMedias[index]) {
+      let customButtons = [{ name: 'delete', title: 'Remover' }];
+
+      if (medias[index].type?.includes('video')) {
+        customButtons = [{ name: 'view', title: 'Visualizar' }].concat(
+          customButtons
+        );
+      }
+      options = {
+        ...options,
+        customButtons,
+      };
+    }
+
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.error) {
+        Alert.alert('Erro!', response.error);
+        // eslint-disable-next-line no-empty
+      } else if (response.didCancel) {
+      } else if (response.customButton) {
+        if (response.customButton === 'view') {
+          refsVideos.current[index].current.seek(0);
+          refsVideos.current[index].current.presentFullscreenPlayer();
+        } else {
+          deleteImage(index);
+        }
+      } else {
+        console.log(response);
+
+        console.log(response.type?.includes('image'));
+        const tempPrevMedias = [...data.prevMedias];
+
+        tempPrevMedias[index] = {
+          ...response,
+          type: response.type?.includes('image') ? 'image' : 'video',
+        };
+
+        setData({ ...data, prevMedias: tempPrevMedias });
+
+        if (response.type?.includes('image')) {
+          ImageResizer.createResizedImage(response.uri, 500, 500, 'JPEG', 70)
+            .then(({ uri }) => {
+              const prefix = new Date().getTime();
+
+              const img = {
+                uri,
+                type: response.type,
+                name: `${prefix}.jpg`,
+              };
+
+              const tempMedias = [...medias];
+
+              tempMedias[index] = img;
+
+              setMedias(tempMedias);
+            })
+            .catch((_err) => {
+              Alert.alert(
+                translate('imageError'),
+                translate('imageErrorDescription')
+              );
+            });
+        } else {
+          // save video
+
+          const prefix = new Date().getTime();
+
+          const video = {
+            uri: response.uri,
+            type: 'video/mov',
+            name: `${prefix}-video`,
+          };
+
+          const tempMedias = [...medias];
+
+          tempMedias[index] = video;
+
+          setMedias(tempMedias);
+        }
+      }
+    });
+  };
+
+  const handleNewReport = useCallback((formData) => {
+    console.log(formData);
+  }, []);
+
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#04884E" />
 
       <Modal
         animationType="slide"
-        visible={state.mapVisible}
-        onRequestClose={() => setState({ ...state, mapVisible: false })}
+        visible={data.mapVisible}
+        onRequestClose={() => setData({ ...data, mapVisible: false })}
       >
         <Map
-          closeModal={() => setState({ ...state, mapVisible: false })}
+          closeModal={() => setData({ ...data, mapVisible: false })}
           onFillLocation={onFillLocation}
-          urban={state.urban}
+          urban={data.urban}
         />
       </Modal>
 
@@ -579,840 +642,227 @@ function NewReport({ anonymous, navigation }) {
 
       {loading && <Loading />}
 
-      {Platform.OS === 'ios' ? (
-        <KeyboardAwareScrollView style={{ backgroundColor: '#e8f5fd' }}>
-          <View style={styles.container}>
-            <Card
-              title={
-                anonymous
-                  ? translate('anonymousReport')
-                  : translate('identifiedReport')
-              }
-              iconName={anonymous ? 'lock' : 'person'}
-            >
-              {!anonymous && (
-                <>
-                  <CustomInput
-                    autoCorrect={false}
-                    returnKeyType="next"
-                    onChangeText={(name) => setState({ ...state, name })}
-                    placeholder={translate('name')}
-                    value={state.name}
-                  />
-                  <CustomInput
-                    iconName="email"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    returnKeyType="next"
-                    onChangeText={(email) => setState({ ...state, email })}
-                    placeholder={translate('email')}
-                    value={state.email}
-                  />
-                  <CustomInput
-                    iconName="phone"
-                    keyboardType="phone-pad"
-                    returnKeyType="next"
-                    onChangeText={(phone) => setState({ ...state, phone })}
-                    placeholder={translate('phone')}
-                    value={state.phone}
-                  />
-                </>
-              )}
-            </Card>
-
-            <Card title={translate('location')} iconName="room">
-              {network.isConnected ? (
-                <ButtonIcon
-                  addStyle={{ marginBottom: 10 }}
-                  iconName="room"
-                  onPress={() => setState({ ...state, mapVisible: true })}
-                >
-                  {state.latitude !== ''
-                    ? translate('changeLocation').toUpperCase()
-                    : translate('addLocation').toUpperCase()}
-                </ButtonIcon>
-              ) : (
-                <Text style={styles.label}>
-                  {state.latitude !== ''
-                    ? translate('noConnection')
-                    : translate('searchLocation')}
-                </Text>
-              )}
-
-              {Platform.OS === 'ios' ? (
-                <>
-                  <TouchableOpacity
-                    onPress={() =>
-                      setState({
-                        ...state,
-                        pickerUrbanVisible: true,
-                      })
-                    }
-                    style={[styles.formItem, { flexDirection: 'row' }]}
-                  >
-                    <Text style={{ flex: 1 }}>
-                      {state.urban
-                        ? translate('urbanArea')
-                        : translate('ruralArea')}
-                    </Text>
-                    <Icon
-                      name={
-                        !state.pickerUrbanVisible
-                          ? 'arrow-drop-down'
-                          : 'arrow-drop-up'
-                      }
-                      size={20}
-                      color={Colors.main}
-                    />
-                  </TouchableOpacity>
-                  <Modal
-                    transparent
-                    animationType="slide"
-                    visible={state.pickerUrbanVisible}
-                    onRequestClose={() =>
-                      setState({
-                        ...state,
-                        pickerUrbanVisible: false,
-                      })
-                    }
-                  >
-                    <View
-                      style={{
-                        backgroundColor: 'rgba(0,0,0,0.4)',
-                        flex: 1,
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: Colors.gray,
-                          borderTopLeftRadius: 8,
-                          borderTopRightRadius: 8,
-                        }}
-                      >
-                        <Picker
-                          // style={{
-                          //   marginBottom: 30,
-                          // }}
-                          selectedValue={state.urban}
-                          mode="dropdown"
-                          onValueChange={(urban) =>
-                            setState({
-                              ...state,
-                              urban,
-                              pickerUrbanVisible: false,
-                            })
-                          }
-                        >
-                          <Picker.Item label={translate('urbanArea')} value />
-                          <Picker.Item
-                            label={translate('ruralArea')}
-                            value={false}
-                          />
-                        </Picker>
-                      </View>
-                    </View>
-                  </Modal>
-                </>
-              ) : (
-                <View
-                  style={[
-                    styles.formItem,
-                    {
-                      maxHeight: 50,
-                      justifyContent: 'center',
-                    },
-                  ]}
-                >
-                  <Picker
-                    selectedValue={state.urban}
-                    mode="dropdown"
-                    onValueChange={(urban) => setState({ ...state, urban })}
-                  >
-                    <Picker.Item label={translate('urbanArea')} value />
-                    <Picker.Item label={translate('ruralArea')} value={false} />
-                  </Picker>
-                </View>
-              )}
-
-              {state.urban ? (
-                <>
-                  <CustomInput
-                    // keyboardType="number-pad"
-                    iconName="numeric"
-                    returnKeyType="next"
-                    onChangeText={(number) => setState({ ...state, number })}
-                    placeholder={translate('number')}
-                    value={state.number}
-                  />
-                  <CustomInput
-                    iconName="road-variant"
-                    returnKeyType="next"
-                    onChangeText={(place) => setState({ ...state, place })}
-                    placeholder={translate('street')}
-                    value={state.place}
-                  />
-
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="view-dashboard-variant"
-                    onChangeText={(zone) => setState({ ...state, zone })}
-                    placeholder={translate('district')}
-                    value={state.zone}
-                  />
-
-                  <CustomInput
-                    // keyboardType="number-pad"
-                    iconName="deskphone"
-                    returnKeyType="next"
-                    onChangeText={(cep) => setState({ ...state, cep })}
-                    placeholder={translate('zipcode')}
-                    value={state.cep}
-                  />
-
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="home-city"
-                    onChangeText={(city) => setState({ ...state, city })}
-                    placeholder={translate('city')}
-                    value={state.city}
-                  />
-
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="city"
-                    onChangeText={(estado) => setState({ ...state, estado })}
-                    placeholder={translate('state')}
-                    value={state.estado}
-                  />
-
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="map-marker-radius"
-                    onChangeText={(reference) =>
-                      setState({ ...state, reference })
-                    }
-                    placeholder={translate('reference')}
-                    value={state.reference}
-                  />
-                </>
-              ) : (
-                <>
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="home-city"
-                    onChangeText={(city) => setState({ ...state, city })}
-                    placeholder={translate('city')}
-                    value={state.city}
-                  />
-
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="city"
-                    onChangeText={(estado) => setState({ ...state, estado })}
-                    placeholder={translate('state')}
-                    value={state.estado}
-                  />
-                  <CustomInput
-                    returnKeyType="next"
-                    iconName="map-marker-radius"
-                    onChangeText={(reference) =>
-                      setState({ ...state, reference })
-                    }
-                    placeholder={translate('reference')}
-                    value={state.reference}
-                  />
-                </>
-              )}
-            </Card>
-
-            <Card title={translate('reportInformation')} iconName="info">
-              {Platform.OS == 'ios' ? (
-                <>
-                  <TouchableOpacity
-                    onPress={() =>
-                      setState({
-                        ...state,
-                        pickerVisible: true,
-                      })
-                    }
-                    style={[styles.formItem, { flexDirection: 'row' }]}
-                  >
-                    <Text style={{ flex: 1 }}>
-                      {state.type
-                        ? state.typeLabel
-                        : translate('selectReportType')}
-                    </Text>
-                    <Icon
-                      name={
-                        !state.pickerVisible
-                          ? 'arrow-drop-down'
-                          : 'arrow-drop-up'
-                      }
-                      size={20}
-                      color={Colors.main}
-                    />
-                  </TouchableOpacity>
-                  <Modal
-                    transparent
-                    animationType="slide"
-                    visible={state.pickerVisible}
-                    onRequestClose={() =>
-                      setState({
-                        ...state,
-                        pickerVisible: false,
-                      })
-                    }
-                  >
-                    <View
-                      style={{
-                        backgroundColor: 'rgba(0,0,0,0.4)',
-                        flex: 1,
-                        justifyContent: 'flex-end',
-                      }}
-                    >
-                      <View
-                        style={{
-                          backgroundColor: Colors.gray,
-                          borderTopLeftRadius: 8,
-                          borderTopRightRadius: 8,
-                        }}
-                      >
-                        <Picker
-                          selectedValue={state.type}
-                          mode="dropdown"
-                          onValueChange={(type, idx) =>
-                            setState({
-                              ...state,
-                              type,
-                              typeLabel: typesReports[idx].label,
-                              pickerVisible: false,
-                            })
-                          }
-                        >
-                          {typesReports.map((item) => (
-                            <Picker.Item
-                              key={item.value}
-                              label={item.label}
-                              value={item.value}
-                            />
-                          ))}
-                        </Picker>
-                      </View>
-                    </View>
-                  </Modal>
-                </>
-              ) : (
-                <View
-                  style={[
-                    styles.formItem,
-                    {
-                      maxHeight: 50,
-                      justifyContent: 'center',
-                    },
-                  ]}
-                >
-                  <Picker
-                    selectedValue={state.type}
-                    mode="dropdown"
-                    onValueChange={(type, idx) =>
-                      setState({
-                        ...state,
-                        type,
-                        typeLabel: typesReports[idx].label,
-                        pickerVisible: false,
-                      })
-                    }
-                  >
-                    {typesReports.map((item) => (
-                      <Picker.Item
-                        key={item.value}
-                        label={item.label}
-                        value={item.value}
-                      />
-                    ))}
-                  </Picker>
-                </View>
-              )}
-
-              <TextInput
-                style={[styles.formItem, styles.description]}
-                returnKeyType="done"
-                onChangeText={(description) =>
-                  setState({ ...state, description })
-                }
-                blurOnSubmit
-                placeholder={translate('reportDescription')}
-                multiline
-                numberOfLines={5}
-                value={state.description}
-              />
-
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.selectedImages}
-              >
-                {state.filePath.map((filePath, index) =>
-                  !filePath ? (
-                    <TouchableOpacity
-                      key={index}
-                      onLongPress={() => deleteImage(index)}
-                      onPress={() => openPicker(index)}
-                      style={styles.imageCircle}
-                    >
-                      <Icon name="camera-alt" size={25} color="#fff" />
-                    </TouchableOpacity>
-                  ) : (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => openPicker(index)}
-                    >
-                      <Image
-                        source={{ uri: filePath.uri }}
-                        style={styles.imageCircle}
-                      />
-                    </TouchableOpacity>
-                  )
-                )}
-              </ScrollView>
-
-              {/* <ButtonIcon iconName='camera-alt'
-								onPress={() => openPicker()}
-								addStyle={{ marginBottom: 10 }}>
-								<Text style={{ color: '#fff', marginLeft: 5 }}>{translate('addImage').toUpperCase()}*</Text>
-							</ButtonIcon> */}
-            </Card>
-
-            <ButtonIcon
-              addStyle={{ marginHorizontal: 15, marginTop: 10 }}
-              iconName="send"
-              onPress={() => handleSubmit()}
-            >
-              {translate('sendReport').toUpperCase()}
-            </ButtonIcon>
-          </View>
-        </KeyboardAwareScrollView>
-      ) : (
+      {!loading && (
         <KeyboardAvoidingView
           style={{ flex: 1 }}
+          // keyboardVerticalOffset={30}
+
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
           enabled
         >
-          <ScrollView keyboardShouldPersistTaps="handled" style={styles.scroll}>
+          <ScrollView
+            // removeClippedSubviews={false}
+            keyboardShouldPersistTaps="handled"
+
+            // contentContainerStyle={{ flex: 1 }}
+          >
             <View style={styles.container}>
-              <Card
-                title={
-                  anonymous
-                    ? translate('anonymousReport')
-                    : translate('identifiedReport')
-                }
-                iconName={anonymous ? 'lock' : 'person'}
+              <Form
+                onSubmit={handleNewReport}
+                ref={formRef}
+                initialData={{
+                  ...data,
+                }}
               >
-                {!anonymous && (
-                  <>
-                    <CustomInput
-                      autoCorrect={false}
-                      returnKeyType="next"
-                      onChangeText={(name) => setState({ ...state, name })}
-                      placeholder={translate('name')}
-                      value={state.name}
-                    />
-                    <CustomInput
-                      iconName="email"
-                      keyboardType="email-address"
-                      autoCapitalize="none"
-                      returnKeyType="next"
-                      onChangeText={(email) => setState({ ...state, email })}
-                      placeholder={translate('email')}
-                      value={state.email}
-                    />
-                    <CustomInput
-                      iconName="phone"
-                      keyboardType="phone-pad"
-                      returnKeyType="next"
-                      onChangeText={(phone) => setState({ ...state, phone })}
-                      placeholder={translate('phone')}
-                      value={state.phone}
-                    />
-                  </>
-                )}
-              </Card>
-
-              <Card title={translate('location')} iconName="room">
-                {network.isConnected ? (
-                  <ButtonIcon
-                    addStyle={{ marginBottom: 10 }}
-                    iconName="room"
-                    onPress={() => setState({ ...state, mapVisible: true })}
-                  >
-                    {state.latitude !== ''
-                      ? translate('changeLocation').toUpperCase()
-                      : translate('addLocation').toUpperCase()}
-                  </ButtonIcon>
-                ) : (
-                  <Text style={styles.label}>
-                    {state.latitude !== ''
-                      ? translate('noConnection')
-                      : translate('searchLocation')}
-                  </Text>
-                )}
-
-                {Platform.OS === 'ios' ? (
-                  <>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setState({
-                          ...state,
-                          pickerUrbanVisible: true,
-                        })
-                      }
-                      style={[styles.formItem, { flexDirection: 'row' }]}
-                    >
-                      <Text style={{ flex: 1 }}>
-                        {state.urban
-                          ? translate('urbanArea')
-                          : translate('ruralArea')}
-                      </Text>
-                      <Icon
-                        name={
-                          !state.pickerUrbanVisible
-                            ? 'arrow-drop-down'
-                            : 'arrow-drop-up'
-                        }
-                        size={20}
-                        color={Colors.main}
-                      />
-                    </TouchableOpacity>
-                    <Modal
-                      transparent
-                      animationType="slide"
-                      visible={state.pickerUrbanVisible}
-                      onRequestClose={() =>
-                        setState({
-                          ...state,
-                          pickerUrbanVisible: false,
-                        })
-                      }
-                    >
-                      <View
-                        style={{
-                          backgroundColor: 'rgba(0,0,0,0.4)',
-                          flex: 1,
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <View
-                          style={{
-                            backgroundColor: Colors.gray,
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
-                          }}
-                        >
-                          <Picker
-                            // style={{
-                            //   marginBottom: 30,
-                            // }}
-                            selectedValue={state.urban}
-                            mode="dropdown"
-                            onValueChange={(urban) =>
-                              setState({
-                                ...state,
-                                urban,
-                                pickerUrbanVisible: false,
-                              })
-                            }
-                          >
-                            <Picker.Item label={translate('urbanArea')} value />
-                            <Picker.Item
-                              label={translate('ruralArea')}
-                              value={false}
-                            />
-                          </Picker>
-                        </View>
-                      </View>
-                    </Modal>
-                  </>
-                ) : (
-                  <View
-                    style={[
-                      styles.formItem,
-                      {
-                        maxHeight: 50,
-                        justifyContent: 'center',
-                      },
-                    ]}
-                  >
-                    <Picker
-                      selectedValue={state.urban}
-                      mode="dropdown"
-                      onValueChange={(urban) => setState({ ...state, urban })}
-                    >
-                      <Picker.Item label={translate('urbanArea')} value />
-                      <Picker.Item
-                        label={translate('ruralArea')}
-                        value={false}
-                      />
-                    </Picker>
-                  </View>
-                )}
-
-                {state.urban ? (
-                  <>
-                    <CustomInput
-                      // keyboardType="number-pad"
-                      returnKeyType="next"
-                      onChangeText={(number) => setState({ ...state, number })}
-                      placeholder={translate('number')}
-                      value={state.number}
-                      iconName="numeric"
-                    />
-                    <CustomInput
-                      returnKeyType="next"
-                      onChangeText={(place) => setState({ ...state, place })}
-                      placeholder={translate('street')}
-                      value={state.place}
-                      iconName="road-variant"
-                    />
-
-                    <CustomInput
-                      returnKeyType="next"
-                      onChangeText={(zone) => setState({ ...state, zone })}
-                      placeholder={translate('district')}
-                      value={state.zone}
-                      iconName="view-dashboard-variant"
-                    />
-
-                    <CustomInput
-                      // keyboardType="number-pad"
-                      returnKeyType="next"
-                      onChangeText={(cep) => setState({ ...state, cep })}
-                      placeholder={translate('zipcode')}
-                      value={state.cep}
-                      iconName="deskphone"
-                    />
-
-                    <CustomInput
-                      returnKeyType="next"
-                      onChangeText={(city) => setState({ ...state, city })}
-                      placeholder={translate('city')}
-                      value={state.city}
-                      iconName="home-city"
-                    />
-
-                    <CustomInput
-                      returnKeyType="next"
-                      onChangeText={(estado) => setState({ ...state, estado })}
-                      placeholder={translate('state')}
-                      value={state.estado}
-                      iconName="city"
-                    />
-
-                    <CustomInput
-                      iconName="map-marker-radius"
-                      returnKeyType="next"
-                      onChangeText={(reference) =>
-                        setState({ ...state, reference })
-                      }
-                      placeholder={translate('reference')}
-                      value={state.reference}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <CustomInput
-                      iconName="home-city"
-                      returnKeyType="next"
-                      onChangeText={(city) => setState({ ...state, city })}
-                      placeholder={translate('city')}
-                      value={state.city}
-                    />
-
-                    <CustomInput
-                      iconName="city"
-                      returnKeyType="next"
-                      onChangeText={(estado) => setState({ ...state, estado })}
-                      placeholder={translate('state')}
-                      value={state.estado}
-                    />
-                    <CustomInput
-                      iconName="map-marker-radius"
-                      returnKeyType="next"
-                      onChangeText={(reference) =>
-                        setState({ ...state, reference })
-                      }
-                      placeholder={translate('reference')}
-                      value={state.reference}
-                    />
-                  </>
-                )}
-              </Card>
-
-              <Card title={translate('reportInformation')} iconName="info">
-                {Platform.OS == 'ios' ? (
-                  <>
-                    <TouchableOpacity
-                      onPress={() =>
-                        setState({
-                          ...state,
-                          pickerVisible: true,
-                        })
-                      }
-                      style={[styles.formItem, { flexDirection: 'row' }]}
-                    >
-                      <Text style={{ flex: 1 }}>
-                        {state.type
-                          ? state.typeLabel
-                          : translate('selectReportType')}
-                      </Text>
-                      <Icon
-                        name={
-                          !state.pickerVisible
-                            ? 'arrow-drop-down'
-                            : 'arrow-drop-up'
-                        }
-                        size={20}
-                        color={Colors.main}
-                      />
-                    </TouchableOpacity>
-                    <Modal
-                      transparent
-                      animationType="slide"
-                      visible={state.pickerVisible}
-                      onRequestClose={() =>
-                        setState({
-                          ...state,
-                          pickerVisible: false,
-                        })
-                      }
-                    >
-                      <View
-                        style={{
-                          backgroundColor: 'rgba(0,0,0,0.4)',
-                          flex: 1,
-                          justifyContent: 'flex-end',
-                        }}
-                      >
-                        <View
-                          style={{
-                            backgroundColor: Colors.gray,
-                            borderTopLeftRadius: 8,
-                            borderTopRightRadius: 8,
-                          }}
-                        >
-                          <Picker
-                            selectedValue={state.type}
-                            mode="dropdown"
-                            onValueChange={(type, idx) =>
-                              setState({
-                                ...state,
-                                type,
-                                typeLabel: typesReports[idx].label,
-                                pickerVisible: false,
-                              })
-                            }
-                          >
-                            {typesReports.map((item) => (
-                              <Picker.Item
-                                key={item.value}
-                                label={item.label}
-                                value={item.value}
-                              />
-                            ))}
-                          </Picker>
-                        </View>
-                      </View>
-                    </Modal>
-                  </>
-                ) : (
-                  <View
-                    style={[
-                      styles.formItem,
-                      {
-                        maxHeight: 50,
-                        justifyContent: 'center',
-                      },
-                    ]}
-                  >
-                    <Picker
-                      selectedValue={state.type}
-                      mode="dropdown"
-                      onValueChange={(type, idx) =>
-                        setState({
-                          ...state,
-                          type,
-                          typeLabel: typesReports[idx].label,
-                          pickerVisible: false,
-                        })
-                      }
-                    >
-                      {typesReports.map((item) => (
-                        <Picker.Item
-                          key={item.value}
-                          label={item.label}
-                          value={item.value}
-                        />
-                      ))}
-                    </Picker>
-                  </View>
-                )}
-
-                <TextInput
-                  style={[styles.formItem, styles.description]}
-                  returnKeyType="done"
-                  onChangeText={(description) =>
-                    setState({ ...state, description })
+                <Card
+                  title={
+                    anonymous
+                      ? translate('anonymousReport')
+                      : translate('identifiedReport')
                   }
-                  blurOnSubmit
-                  placeholder={translate('reportDescription')}
-                  multiline
-                  numberOfLines={5}
-                  value={state.description}
-                />
-
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.selectedImages}
+                  iconName={anonymous ? 'lock' : 'person'}
                 >
-                  {state.filePath.map((filePath, index) =>
-                    !filePath ? (
-                      <TouchableOpacity
-                        key={index}
-                        onLongPress={() => deleteImage(index)}
-                        onPress={() => openPicker(index)}
-                        style={styles.imageCircle}
-                      >
-                        <Icon name="camera-alt" size={25} color="#fff" />
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity
-                        key={index}
-                        onPress={() => openPicker(index)}
-                      >
-                        <Image
-                          source={{ uri: filePath.uri }}
-                          style={styles.imageCircle}
-                        />
-                      </TouchableOpacity>
-                    )
+                  {!anonymous && (
+                    <>
+                      <Input
+                        autoCorrect={false}
+                        returnKeyType="next"
+                        placeholder={translate('name')}
+                        name="name"
+                      />
+                      <Input
+                        icon="email"
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        returnKeyType="next"
+                        placeholder={translate('email')}
+                        name="email"
+                      />
+                      <Input
+                        icon="phone"
+                        keyboardType="phone-pad"
+                        returnKeyType="next"
+                        placeholder={translate('phone')}
+                        name="phone"
+                      />
+                    </>
                   )}
-                </ScrollView>
+                </Card>
 
-                {/* <ButtonIcon iconName='camera-alt'
+                <Card title={translate('location')} iconName="room">
+                  {network.isConnected ? (
+                    <ButtonIcon
+                      addStyle={{ marginBottom: 10 }}
+                      iconName="room"
+                      onPress={() => setData({ ...data, mapVisible: true })}
+                    >
+                      {data.latitude !== ''
+                        ? translate('changeLocation').toUpperCase()
+                        : translate('addLocation').toUpperCase()}
+                    </ButtonIcon>
+                  ) : (
+                    <Text style={styles.label}>
+                      {data.latitude !== ''
+                        ? translate('noConnection')
+                        : translate('searchLocation')}
+                    </Text>
+                  )}
+
+                  <OptionsZone
+                    handleSelect={(value) => {
+                      setIsUrban(value);
+                    }}
+                  />
+
+                  {isUrban && (
+                    <>
+                      <Input
+                        // keyboardType="number-pad"
+                        name="number"
+                        icon="numeric"
+                        returnKeyType="next"
+                        placeholder={translate('number')}
+                      />
+                      <Input
+                        name="place"
+                        icon="road-variant"
+                        returnKeyType="next"
+                        placeholder={translate('street')}
+                      />
+
+                      <Input
+                        name="zone"
+                        returnKeyType="next"
+                        icon="view-dashboard-variant"
+                        placeholder={translate('district')}
+                      />
+
+                      <Input
+                        // keyboardType="number-pad"
+                        name="cep"
+                        icon="deskphone"
+                        returnKeyType="next"
+                        placeholder={translate('zipcode')}
+                      />
+                    </>
+                  )}
+
+                  <Input
+                    name="city"
+                    returnKeyType="next"
+                    icon="home-city"
+                    placeholder={translate('city')}
+                  />
+
+                  <Input
+                    name="state"
+                    returnKeyType="next"
+                    icon="city"
+                    placeholder={translate('state')}
+                  />
+                  <Input
+                    name="reference"
+                    returnKeyType="next"
+                    icon="map-marker-radius"
+                    placeholder={translate('reference')}
+                  />
+                </Card>
+
+                <Card title={translate('reportInformation')} iconName="info">
+                  <Dropdown
+                    name="type"
+                    options={typesReports.map((item) => ({
+                      label: item.label,
+                      value: item.value,
+                    }))}
+                    placeholder={translate('selectReportType')}
+                    icon="alarm-light"
+                  />
+                  <Input
+                    name="description"
+                    icon="clipboard-text"
+                    style={styles.description}
+                    returnKeyType="done"
+                    blurOnSubmit
+                    placeholder={translate('reportDescription')}
+                    multiline
+                    numberOfLines={5}
+                  />
+
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.selectedImages}
+                  >
+                    {data.prevMedias.map((prevMedia, index) =>
+                      !prevMedia ? (
+                        <TouchableOpacity
+                          key={index}
+                          onPress={() => openPicker(index)}
+                          style={styles.imageCircle}
+                        >
+                          <Icon name="camera-alt" size={25} color="#fff" />
+                        </TouchableOpacity>
+                      ) : (
+                        <TouchableOpacity
+                          key={index}
+                          onLongPress={() => deleteImage(index)}
+                          onPress={() => openPicker(index)}
+                        >
+                          <>
+                            {medias[index]?.type?.includes('video') ? (
+                              <Video
+                                ref={refsVideos.current[index]}
+                                resizeMode="cover"
+                                source={{ uri: prevMedia.uri }} // Can be a URL or a local file.
+                                // ref={(ref) => {
+                                //   this.player = ref;
+                                // }} // Store reference
+                                // onBuffer={this.onBuffer} // Callback when remote video is buffering
+                                // onError={this.videoError} // Callback when video cannot be loaded
+                                style={styles.videoCircle}
+                              />
+                            ) : (
+                              <Image
+                                source={{ uri: prevMedia.uri }}
+                                style={styles.imageCircle}
+                              />
+                            )}
+                          </>
+                        </TouchableOpacity>
+                      )
+                    )}
+                  </ScrollView>
+
+                  {/* <ButtonIcon iconName='camera-alt'
 								onPress={() => openPicker()}
 								addStyle={{ marginBottom: 10 }}>
 								<Text style={{ color: '#fff', marginLeft: 5 }}>{translate('addImage').toUpperCase()}*</Text>
 							</ButtonIcon> */}
-              </Card>
+                </Card>
 
-              <ButtonIcon
-                addStyle={{ marginHorizontal: 15 }}
-                iconName="send"
-                onPress={() => handleSubmit()}
-              >
-                {translate('sendReport').toUpperCase()}
-              </ButtonIcon>
+                <ButtonIcon
+                  addStyle={{ marginHorizontal: 15, marginTop: 10 }}
+                  iconName="send"
+                  // onPress={() => handleSubmit()}
+                  onPress={() => formRef.current.submitForm()}
+                >
+                  {translate('sendReport').toUpperCase()}
+                </ButtonIcon>
+              </Form>
+              {/* <Button onPress={() => formRef.current?.submitForm()}>
+                Cadastrar
+              </Button> */}
             </View>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -1446,8 +896,15 @@ const styles = StyleSheet.create({
     elevation: 1.2,
   },
   description: {
-    textAlignVertical: 'top',
-    height: Platform.OS == 'ios' ? 80 : null,
+    // textAlignVertical: 'top',
+    // height: Platform.OS == 'ios' ? 80 : null,
+    height: 124,
+    // justifyContent: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingTop: 10,
+    paddingBottom: 2,
+    paddingRight: 8,
   },
   selectedImages: {
     flexDirection: 'row',
@@ -1462,6 +919,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   imageCircle: {
+    alignSelf: 'center',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+    marginRight: 10,
+    backgroundColor: '#04884E',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  videoCircle: {
     alignSelf: 'center',
     width: 100,
     height: 100,

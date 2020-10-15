@@ -43,6 +43,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>$(PRODUCT_NAME) would like to use your camera to take a photo of a environmental complaint</string>
+  <key>NSMicrophoneUsageDescription</key>
+  <string>$(PRODUCT_NAME) would like to use your microphone to film a environmental complaint</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Its location is necessary to obtain the latitude and longitude of the location of the environmental crime</string>
 	<key>NSLocationAlwaysUsageDescription</key>
