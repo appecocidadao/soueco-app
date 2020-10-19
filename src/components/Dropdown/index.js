@@ -7,41 +7,44 @@ import Colors from '~/styles/colors';
 
 // import { Container } from './styles';
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    fontSize: 16,
-    // paddingVertical: 12,
-    paddingHorizontal: 48,
-    // borderWidth: 1,
-    // borderColor: 'gray',
-    // borderRadius: 4,
-    // color: 'black',
-    // paddingRight: 30, // to ensure the text is never behind the icon
-    backgroundColor: Colors.soft,
-    height: 48,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 2,
-      height: 2,
+const pickerSelectStyles = ({ error = false } = {}) =>
+  StyleSheet.create({
+    inputIOS: {
+      fontSize: 16,
+      // paddingVertical: 12,
+      paddingHorizontal: 48,
+      // borderWidth: 1,
+      // borderColor: 'gray',
+      // borderRadius: 4,
+      // color: 'black',
+      // paddingRight: 30, // to ensure the text is never behind the icon
+      backgroundColor: Colors.soft,
+      height: 48,
+      borderRadius: 5,
+      borderWidth: 2,
+      borderColor: error ? '#c53030' : Colors.border,
+      padding: 10,
+      marginBottom: 10,
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 2,
+        height: 2,
+      },
+      shadowOpacity: 0.5,
+      shadowRadius: 2,
+      elevation: 1.2,
     },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
-    elevation: 1.2,
-  },
-  inputAndroid: {
-    fontSize: 16,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderWidth: 0.5,
-    borderColor: 'purple',
-    borderRadius: 8,
-    color: 'black',
-    paddingRight: 30, // to ensure the text is never behind the icon
-  },
-});
+    inputAndroid: {
+      fontSize: 16,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderWidth: 0.5,
+      borderColor: 'purple',
+      borderRadius: 8,
+      color: 'black',
+      paddingRight: 30, // to ensure the text is never behind the icon
+    },
+  });
 const Dropdown = ({ name, options, placeholder, icon }) => {
   const selectRef = useRef(null);
   const { fieldName, defaultValue, registerField, error } = useField(name);
@@ -69,7 +72,7 @@ const Dropdown = ({ name, options, placeholder, icon }) => {
         color: '#9EA0A4',
       }}
       style={{
-        ...pickerSelectStyles,
+        ...pickerSelectStyles({ error }),
         iconContainer: {
           // top: 10,
           // right: 8,
@@ -79,6 +82,7 @@ const Dropdown = ({ name, options, placeholder, icon }) => {
           justifyContent: 'space-between',
           padding: 8,
         },
+
         placeholder: { color: Colors.fontLight },
       }}
       onValueChange={(value) => {}}

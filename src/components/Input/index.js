@@ -37,6 +37,9 @@ function Input({ name, icon, style, ...rest }, ref) {
 
   useEffect(() => {
     inputRef.current.value = defaultValue;
+    if (defaultValue) {
+      setIsFilled(true);
+    }
   }, [defaultValue]);
 
   useEffect(() => {

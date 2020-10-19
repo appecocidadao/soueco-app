@@ -27,8 +27,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
 // import AsyncStorage from '@react-native-community/async-storage';
+import * as Yup from 'yup';
 import { Form } from '@unform/mobile';
 import Geolocation from '@react-native-community/geolocation';
+import getValidationErrors from '~/utils/getValidationErrors';
 // import AddressByLocation from '~/utils/AddressByLocation';
 
 import {
@@ -51,6 +53,7 @@ import Loading from '~/components/Loading';
 import { translate } from '~/locales';
 import Dropdown from '~/components/Dropdown';
 import OptionsZone from '~/components/OptionsZone';
+import colors from '~/styles/colors';
 
 Geolocation.setRNConfiguration({ authorizationLevel: 'always' });
 
@@ -75,13 +78,13 @@ function NewReport({ anonymous, navigation }) {
 
     // name: '',
     // email: '',
-    // phone: '',
+    // contact: '',
 
     urban: true,
-    place: '',
-    zone: '',
+    street: '',
+    district: '',
     number: '',
-    cep: '',
+    zipcode: '',
     city: '',
     state: '',
     reference: '',
@@ -94,6 +97,9 @@ function NewReport({ anonymous, navigation }) {
   });
 
   const [medias, setMedias] = useState([null, null, null]);
+  const [errorsMedias, setErrorsMedias] = useState([null, null, null]);
+
+  const [errorLocation, setErrorLocation] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const initialData = {
@@ -103,13 +109,13 @@ function NewReport({ anonymous, navigation }) {
 
     name: '',
     email: '',
-    phone: '',
+    contact: '',
 
     urban: true,
-    place: '',
-    zone: '',
+    street: '',
+    district: '',
     number: '',
-    cep: '',
+    zipcode: '',
     // city: '',
     // state: '',
     reference: '',
@@ -208,16 +214,17 @@ function NewReport({ anonymous, navigation }) {
     cep,
     state
   ) => {
-    console.log('que pohha');
+    setErrorLocation(!latitude || !longitude);
+
     setData((prevData) => ({
       ...prevData,
       latitude,
       longitude,
 
-      place,
-      zone,
+      street: place,
+      district: zone,
       city,
-      cep,
+      zipcode: cep,
       state,
       mapVisible: false,
     }));
@@ -226,10 +233,10 @@ function NewReport({ anonymous, navigation }) {
       latitude,
       longitude,
 
-      place,
-      zone,
+      street: place,
+      district: zone,
       city,
-      cep,
+      zipcode: cep,
       state,
     });
   };
@@ -250,12 +257,12 @@ function NewReport({ anonymous, navigation }) {
     const {
       name,
       email,
-      phone,
+      contact,
       urban,
-      place,
-      zone,
+      street,
+      district,
       number,
-      cep,
+      zipcode,
       city,
       state,
       reference,
@@ -265,7 +272,7 @@ function NewReport({ anonymous, navigation }) {
       longitude,
     } = data;
 
-    if (!anonymous && (!email || !name || !phone)) {
+    if (!anonymous && (!email || !name || !contact)) {
       Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
       return;
     }
@@ -304,7 +311,7 @@ function NewReport({ anonymous, navigation }) {
       }
     }
 
-    if (urban && (!place || !zone || !cep || !number)) {
+    if (urban && (!street || !district || !zipcode || !number)) {
       Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
       return;
     }
@@ -378,15 +385,15 @@ function NewReport({ anonymous, navigation }) {
       if (!anonymous) {
         report.append('name', name);
         report.append('email', email);
-        report.append('contact', phone);
+        report.append('contact', contact);
       }
 
       report.append('urban', urban);
 
-      report.append('street', place);
-      report.append('district', zone);
+      report.append('street', street);
+      report.append('district', district);
       report.append('number', number);
-      report.append('zipcode', cep);
+      report.append('zipcode', zipcode);
       report.append('state', state);
       report.append('city', city);
       report.append('reference', reference);
@@ -525,6 +532,7 @@ function NewReport({ anonymous, navigation }) {
       },
       mediaType: 'mixed',
       durationLimit: 10,
+      formatToMp4: true,
     };
 
     if (data.prevMedias[index]) {
@@ -596,7 +604,7 @@ function NewReport({ anonymous, navigation }) {
 
           const video = {
             uri: response.uri,
-            type: 'video/mov',
+            type: 'video/mp4',
             name: `${prefix}-video`,
           };
 
@@ -610,9 +618,111 @@ function NewReport({ anonymous, navigation }) {
     });
   };
 
-  const handleNewReport = useCallback((formData) => {
-    console.log(formData);
-  }, []);
+  const handleNewReport = useCallback(
+    async (formData) => {
+      const report = {
+        ...formData,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        urban: isUrban,
+        anonymous,
+      };
+      console.log(report);
+
+      try {
+        formRef.current?.setErrors({});
+
+        const schema = Yup.object().shape({
+          type: Yup.string()
+            .nullable()
+            .required('Must enter type denunciation'),
+          description: Yup.string().required('Must enter description'),
+          longitude: Yup.number().required('Must enter longitude'),
+          latitude: Yup.number().required('Must enter latitude'),
+          urban: Yup.boolean().required('must enter urban'),
+          anonymous: Yup.boolean().required('must enter anonymous'),
+          reference: Yup.string(),
+          // country: Yup.string().required('Must enter country'),
+          country: Yup.string(),
+          state: Yup.string().required('Must enter state'),
+          city: Yup.string().required('Must enter city'),
+          zipcode: Yup.string().when('urban', {
+            is: true,
+            then: Yup.string().required('Must enter zipcode address'),
+          }),
+          number: Yup.string().when('urban', {
+            is: true,
+            then: Yup.string().required('Must enter number address'),
+          }),
+          street: Yup.string().when('urban', {
+            is: true,
+            then: Yup.string().required('Must enter street address'),
+          }),
+          district: Yup.string().when('urban', {
+            is: true,
+            then: Yup.string().required('Must enter district address'),
+          }),
+          // timestamp: Yup.date().required('Must enter timestamp'),
+          name: Yup.string().when('anonymous', {
+            is: false,
+            then: Yup.string().required('Must enter name'),
+          }),
+          email: Yup.string().when('anonymous', {
+            is: false,
+            then: Yup.string().required('Must enter email'),
+          }),
+          contact: Yup.string().when('anonymous', {
+            is: false,
+            then: Yup.string().required('Must enter contact'),
+          }),
+
+          medias: Yup.array()
+            .of(Yup.object().nullable().required('Must enter one media'))
+            .required('Must enter medias'),
+
+          // date: Yup.date().required(),
+        });
+
+        await schema.validate(
+          { ...report, medias },
+          {
+            abortEarly: false,
+          }
+        );
+
+        // await api.post('/users', data);
+        // Alert.alert(
+        //   'Cadastro realizado com sucesso',
+        //   'Você já pode fazer login na aplicação',
+        // );
+        // navigation.goBack();
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          console.log(errors);
+          formRef.current?.setErrors(errors);
+          console.log(formRef.current?.getErrors());
+
+          setErrorsMedias([
+            formRef.current?.getFieldError(`medias[0]`),
+            formRef.current?.getFieldError(`medias[1]`),
+            formRef.current?.getFieldError(`medias[2]`),
+          ]);
+
+          setErrorLocation(
+            formRef.current?.getFieldError(`latitude`) ||
+              formRef.current?.getFieldError(`longitude`)
+          );
+          return;
+        }
+        Alert.alert(
+          'Erro no cadastro',
+          'Ocorreu um erro ao fazer cadastro, tente novamente.'
+        );
+      }
+    },
+    [data.longitude, data.latitude, anonymous, isUrban, medias]
+  );
 
   return (
     <>
@@ -693,7 +803,7 @@ function NewReport({ anonymous, navigation }) {
                         keyboardType="phone-pad"
                         returnKeyType="next"
                         placeholder={translate('phone')}
-                        name="phone"
+                        name="contact"
                       />
                     </>
                   )}
@@ -702,7 +812,16 @@ function NewReport({ anonymous, navigation }) {
                 <Card title={translate('location')} iconName="room">
                   {network.isConnected ? (
                     <ButtonIcon
-                      addStyle={{ marginBottom: 10 }}
+                      addStyle={{
+                        marginBottom: 10,
+                        ...(errorLocation
+                          ? {
+                              height: 55,
+                              borderColor: '#c53030',
+                              borderWidth: 3,
+                            }
+                          : {}),
+                      }}
                       iconName="room"
                       onPress={() => setData({ ...data, mapVisible: true })}
                     >
@@ -734,14 +853,14 @@ function NewReport({ anonymous, navigation }) {
                         placeholder={translate('number')}
                       />
                       <Input
-                        name="place"
+                        name="street"
                         icon="road-variant"
                         returnKeyType="next"
                         placeholder={translate('street')}
                       />
 
                       <Input
-                        name="zone"
+                        name="district"
                         returnKeyType="next"
                         icon="view-dashboard-variant"
                         placeholder={translate('district')}
@@ -749,7 +868,7 @@ function NewReport({ anonymous, navigation }) {
 
                       <Input
                         // keyboardType="number-pad"
-                        name="cep"
+                        name="zipcode"
                         icon="deskphone"
                         returnKeyType="next"
                         placeholder={translate('zipcode')}
@@ -809,34 +928,98 @@ function NewReport({ anonymous, navigation }) {
                         <TouchableOpacity
                           key={index}
                           onPress={() => openPicker(index)}
-                          style={styles.imageCircle}
+                          style={[
+                            styles.imageCircle,
+                            errorsMedias[index]
+                              ? {
+                                  borderColor: '#c53030',
+                                  borderWidth: 3,
+                                }
+                              : {},
+                          ]}
                         >
-                          <Icon name="camera-alt" size={25} color="#fff" />
+                          <Icon name="camera-alt" size={24} color="#fff" />
+
+                          <View
+                            style={{
+                              borderWidth: 1,
+                              width: 32,
+                              borderColor: '#fff',
+                              transform: [
+                                {
+                                  translateX: -0.8,
+                                },
+                              ],
+                            }}
+                          />
+                          <Icon name="videocam" size={26} color="#fff" />
                         </TouchableOpacity>
                       ) : (
                         <TouchableOpacity
                           key={index}
                           onLongPress={() => deleteImage(index)}
                           onPress={() => openPicker(index)}
+                          style={{ position: 'relative' }}
                         >
                           <>
                             {medias[index]?.type?.includes('video') ? (
-                              <Video
-                                ref={refsVideos.current[index]}
-                                resizeMode="cover"
-                                source={{ uri: prevMedia.uri }} // Can be a URL or a local file.
-                                // ref={(ref) => {
-                                //   this.player = ref;
-                                // }} // Store reference
-                                // onBuffer={this.onBuffer} // Callback when remote video is buffering
-                                // onError={this.videoError} // Callback when video cannot be loaded
-                                style={styles.videoCircle}
-                              />
+                              <>
+                                <View
+                                  style={{
+                                    position: 'absolute',
+                                    zIndex: 10,
+                                    right: 2,
+                                    top: 0,
+                                    padding: 4,
+                                    backgroundColor: colors.soft,
+                                    borderRadius: 22,
+                                  }}
+                                >
+                                  <Icon
+                                    name="videocam"
+                                    size={22}
+                                    color={colors.main}
+                                    style={{}}
+                                  />
+                                </View>
+                                <Video
+                                  ref={refsVideos.current[index]}
+                                  resizeMode="cover"
+                                  source={{ uri: prevMedia.uri }} // Can be a URL or a local file.
+                                  // ref={(ref) => {
+                                  //   this.player = ref;
+                                  // }} // Store reference
+                                  // onBuffer={this.onBuffer} // Callback when remote video is buffering
+                                  // onError={this.videoError} // Callback when video cannot be loaded
+                                  style={[styles.videoCircle, { zIndex: 5 }]}
+                                />
+                              </>
                             ) : (
-                              <Image
-                                source={{ uri: prevMedia.uri }}
-                                style={styles.imageCircle}
-                              />
+                              <>
+                                <View
+                                  style={{
+                                    position: 'absolute',
+                                    zIndex: 10,
+                                    right: 2,
+                                    top: 0,
+                                    padding: 4,
+                                    backgroundColor: colors.soft,
+                                    borderRadius: 22,
+                                  }}
+                                >
+                                  <Icon
+                                    name="photo-camera"
+                                    size={22}
+                                    color={colors.main}
+                                    style={{}}
+                                  />
+                                </View>
+
+                                <Image
+                                  source={{ uri: prevMedia.uri }}
+                                  style={styles.imageCircle}
+                                />
+                              </>
                             )}
                           </>
                         </TouchableOpacity>
@@ -907,6 +1090,7 @@ const styles = StyleSheet.create({
     paddingRight: 8,
   },
   selectedImages: {
+    marginTop: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -923,6 +1107,8 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
+    borderWidth: 2,
+    borderColor: Colors.border,
     marginBottom: 10,
     marginRight: 10,
     backgroundColor: '#04884E',
