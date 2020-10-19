@@ -26,6 +26,8 @@ import Video from 'react-native-video';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import ImagePicker from 'react-native-image-picker';
 import ImageResizer from 'react-native-image-resizer';
+import Toast from 'react-native-toast-message';
+
 // import AsyncStorage from '@react-native-community/async-storage';
 import * as Yup from 'yup';
 import { Form } from '@unform/mobile';
@@ -214,7 +216,24 @@ function NewReport({ anonymous, navigation }) {
     cep,
     state
   ) => {
-    setErrorLocation(!latitude || !longitude);
+    if (!latitude || !longitude) {
+      // Toast.show({
+      //   type: 'error',
+      //   position: 'bottom',
+      //   text1: 'Por favor,',
+      //   text2: 'Não possivel obter sua localização, tente novamente...',
+      // });
+      if (!data.latitude || !data.longitude) {
+        setErrorLocation(true);
+      }
+
+      setData((prevData) => ({
+        ...prevData,
+
+        mapVisible: false,
+      }));
+      return;
+    }
 
     setData((prevData) => ({
       ...prevData,
@@ -436,6 +455,8 @@ function NewReport({ anonymous, navigation }) {
 
             setData(initialData);
             setMedias([null, null, null]);
+            setErrorLocation(false);
+            setErrorsMedias([null, null, null]);
 
             dispatch(addReport(rest));
             navigation.navigate('Home');
@@ -490,6 +511,8 @@ function NewReport({ anonymous, navigation }) {
           onPress: () => {
             setData(initialData);
             setMedias([null, null, null]);
+            setErrorLocation(false);
+            setErrorsMedias([null, null, null]);
             navigation.navigate('Home');
           },
           style: 'cancel',
@@ -620,14 +643,14 @@ function NewReport({ anonymous, navigation }) {
 
   const handleNewReport = useCallback(
     async (formData) => {
-      const report = {
+      const allData = {
         ...formData,
         latitude: data.latitude,
         longitude: data.longitude,
         urban: isUrban,
         anonymous,
       };
-      console.log(report);
+      console.log(allData);
 
       try {
         formRef.current?.setErrors({});
@@ -684,19 +707,62 @@ function NewReport({ anonymous, navigation }) {
         });
 
         await schema.validate(
-          { ...report, medias },
+          { ...allData, medias },
           {
             abortEarly: false,
           }
         );
 
-        // await api.post('/users', data);
-        // Alert.alert(
-        //   'Cadastro realizado com sucesso',
-        //   'Você já pode fazer login na aplicação',
-        // );
-        // navigation.goBack();
+        if (!network.isConnected) {
+          throw new Error('Fail');
+        }
+        setLoading(true);
+
+        const report = new FormData();
+
+        report.append('anonymous', anonymous);
+
+        if (!anonymous) {
+          report.append('name', allData.name);
+          report.append('email', allData.email);
+          report.append('contact', allData.contact);
+        }
+
+        report.append('urban', allData.urban);
+
+        report.append('street', allData.street);
+        report.append('district', allData.district);
+        report.append('number', allData.number);
+        report.append('zipcode', allData.zipcode);
+        report.append('state', allData.state);
+        report.append('city', allData.city);
+        report.append('reference', allData.reference);
+        report.append('latitude', allData.latitude);
+        report.append('longitude', allData.longitude);
+        report.append('timestamp', new Date().toISOString());
+
+        report.append('type', allData.type);
+        report.append('description', allData.description);
+        report.append('file', medias[0]);
+        report.append('file', medias[1]);
+        report.append('file', medias[2]);
+
+        const response = await api.post('/denunciations', report);
+
+        // await pushReportCode(response.data.denunciation.code);
+
+        setData(initialData);
+        setMedias([null, null, null]);
+        setErrorLocation(false);
+        setErrorsMedias([null, null, null]);
+        setLoading(false);
+
+        Alert.alert(translate('reported'), translate('reportedDescription'));
+        dispatch(sendReportSuccess(response.data.denunciation));
+
+        navigation.navigate('Home');
       } catch (err) {
+        setLoading(false);
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
           console.log(errors);
@@ -709,19 +775,104 @@ function NewReport({ anonymous, navigation }) {
             formRef.current?.getFieldError(`medias[2]`),
           ]);
 
-          setErrorLocation(
+          if (
             formRef.current?.getFieldError(`latitude`) ||
-              formRef.current?.getFieldError(`longitude`)
-          );
+            formRef.current?.getFieldError(`longitude`)
+          ) {
+            setErrorLocation(true);
+            // colocar um confirm dialog para confirmar a localizacao do dispositivo como local
+            Geolocation.getCurrentPosition(
+              async ({ coords: { latitude, longitude } }) => {
+                setData((prevData) => ({
+                  ...prevData,
+                  latitude,
+                  longitude,
+                }));
+                formRef.current.setData({
+                  latitude,
+                  longitude,
+                });
+
+                setErrorLocation(false);
+              },
+              (_err) => {
+                Alert.alert(
+                  translate('locationError'),
+                  translate('checkConnectionGPS')
+                );
+                setLoading(false);
+                // closeModal();
+              },
+              {
+                timeout: 10000,
+                enableHighAccuracy: false,
+                maximumAge: 5000,
+              }
+            );
+          } else {
+            setErrorLocation(false);
+          }
+
+          Toast.show({
+            type: 'error',
+            position: 'bottom',
+            text1: translate('incompleteReport'),
+            text2: translate('fillAllFields'),
+          });
           return;
         }
-        Alert.alert(
-          'Erro no cadastro',
-          'Ocorreu um erro ao fazer cadastro, tente novamente.'
-        );
+
+        Alert.alert(translate('errorSend'), translate('submitLater'), [
+          {
+            text: translate('yesSave'),
+            onPress: async () => {
+              setLoading(true);
+
+              const {
+                mapVisible,
+                activityIndicator,
+                prevMedias,
+                ...rest
+              } = data;
+
+              rest.medias = medias;
+              rest.anonymous = anonymous;
+              rest.timestamp = new Date().toISOString();
+
+              setData(initialData);
+              setMedias([null, null, null]);
+              setErrorLocation(false);
+              setErrorsMedias([null, null, null]);
+
+              dispatch(addReport(rest));
+              navigation.navigate('Home');
+              setLoading(false);
+            },
+          },
+          {
+            text: translate('noDelete'),
+            onPress: () => {
+              setData(initialData);
+              setMedias([null, null, null]);
+              setErrorLocation(false);
+              setErrorsMedias([null, null, null]);
+              navigation.navigate('Home');
+            },
+            style: 'cancel',
+          },
+        ]);
       }
     },
-    [data.longitude, data.latitude, anonymous, isUrban, medias]
+    [
+      anonymous,
+      isUrban,
+      medias,
+      navigation,
+      data,
+      dispatch,
+      initialData,
+      network.isConnected,
+    ]
   );
 
   return (

@@ -4,6 +4,8 @@ import OneSignal from 'react-native-onesignal';
 import { PersistGate } from 'redux-persist/integration/react';
 import { Provider } from 'react-redux';
 
+import Toast from 'react-native-toast-message';
+
 import { NavigationContainer } from '@react-navigation/native';
 
 import { StatusBar } from 'react-native';
@@ -64,6 +66,7 @@ class Index extends Component {
               barStyle="light-content"
             />
             <App />
+            <Toast ref={(ref) => Toast.setRef(ref)} />
           </PersistGate>
         </Provider>
       </NavigationContainer>
