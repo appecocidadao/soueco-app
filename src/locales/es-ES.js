@@ -75,7 +75,7 @@ export default {
   imageError: 'Error de imagen',
   imageErrorDescription: 'Error al insertar la imagen.',
   attention: 'Atención',
-  msgDeleteImg: 'Quieres borrar esta imagen?',
+  msgDeleteImg: 'Quieres borrar esta evidencia?',
   yesDelete: 'Sí, eliminar',
   cancel: 'Cancelar',
   noConnection: 'Sin conexión. Usando su ubicación actual.',
@@ -99,4 +99,11 @@ export default {
   professor: 'Profesor de la UEA',
   developer: 'Desarrollador',
   none: 's/n',
+
+  insertEvidence: 'Insertar evidencia',
+  cancelButtonTitle: 'Cancelar',
+  takePhotoButtonTitle: 'Cámara abierta',
+  chooseFromLibraryButtonTitle: 'Galería',
+  removeTitle: 'Para eliminar',
+  viewTitle: 'Para ver',
 };

@@ -259,7 +259,7 @@ function NewReport({ anonymous, navigation }) {
   };
 
   const deleteImage = (index) => {
-    Alert.alert(translate('Attention'), translate('msgDeleteImg'), [
+    Alert.alert(translate('attention'), translate('msgDeleteImg'), [
       {
         text: translate('yesDelete'),
         onPress: () => {
@@ -281,10 +281,10 @@ function NewReport({ anonymous, navigation }) {
 
   const openPicker = (index) => {
     let options = {
-      title: 'Inserir evidência',
-      cancelButtonTitle: 'Cancelar',
-      takePhotoButtonTitle: 'Abrir câmera',
-      chooseFromLibraryButtonTitle: 'Galeria',
+      title: translate('insertEvidence'),
+      cancelButtonTitle: translate('cancelButtonTitle'),
+      takePhotoButtonTitle: translate('takePhotoButtonTitle'),
+      chooseFromLibraryButtonTitle: translate('chooseFromLibraryButtonTitle'),
 
       storageOptions: {
         skipBackup: true,
@@ -296,12 +296,12 @@ function NewReport({ anonymous, navigation }) {
     };
 
     if (data.prevMedias[index]) {
-      let customButtons = [{ name: 'delete', title: 'Remover' }];
+      let customButtons = [{ name: 'delete', title: translate('removeTitle') }];
 
       if (medias[index].type?.includes('video')) {
-        customButtons = [{ name: 'view', title: 'Visualizar' }].concat(
-          customButtons
-        );
+        customButtons = [
+          { name: 'view', title: translate('viewTitle') },
+        ].concat(customButtons);
       }
       options = {
         ...options,
@@ -632,7 +632,7 @@ function NewReport({ anonymous, navigation }) {
 
       {!loading && (
         <KeyboardAvoidingView
-          style={{ flex: 1 }}
+          style={{ flex: 1, backgroundColor: '#E8F5FD' }}
           // keyboardVerticalOffset={30}
 
           behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -641,8 +641,7 @@ function NewReport({ anonymous, navigation }) {
           <ScrollView
             // removeClippedSubviews={false}
             keyboardShouldPersistTaps="handled"
-
-            // contentContainerStyle={{ flex: 1 }}
+            contentContainerStyle={{ backgroundColor: '#E8F5FD' }}
           >
             <View style={styles.container}>
               <Form
@@ -935,7 +934,7 @@ function NewReport({ anonymous, navigation }) {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: '#e8f5fd',
+    backgroundColor: '#E8F5FD',
   },
   container: {
     padding: 15,

@@ -78,7 +78,7 @@ export default {
   imageError: "Erreur d'image",
   imageErrorDescription: "Erreur lors de l'insertion de l'image.",
   attention: 'Attention',
-  msgDeleteImg: 'Voulez-vous supprimer cette image?',
+  msgDeleteImg: 'Voulez-vous supprimer cette preuve?',
   yesDelete: 'Oui, supprimer',
   cancel: 'Annuler',
   noConnection: 'Pas de connection. Utilisation de votre position actuelle.',
@@ -104,4 +104,11 @@ export default {
   developer: 'Développeur',
   none: 'aucun',
   home: 'Sou ECO!',
+
+  insertEvidence: 'Insérer des preuves',
+  cancelButtonTitle: 'Annuler',
+  takePhotoButtonTitle: 'Ouvrir la caméra',
+  chooseFromLibraryButtonTitle: 'Galerie',
+  removeTitle: 'Retirer',
+  viewTitle: 'Regarder',
 };

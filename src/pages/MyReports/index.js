@@ -1,8 +1,7 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-nested-ternary */
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, Text } from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
+import { StyleSheet, ScrollView, FlatList, Text } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -14,7 +13,6 @@ import Loading from '~/components/Loading';
 import ReportCard from '~/components/ReportCard';
 
 import { sendAllRequest } from '~/store/modules/reports/actions';
-import Colors from '~/styles/colors';
 
 import { translate } from '~/locales';
 
@@ -171,7 +169,7 @@ function MyReports({ navigation }) {
                   type={item.type}
                   statusId={1}
                   timestamp={item.timestamp}
-                  uri={item.image[0].uri}
+                  uri={item.medias[0].uri}
                 />
               )}
             />

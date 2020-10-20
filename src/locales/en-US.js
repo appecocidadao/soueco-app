@@ -73,7 +73,7 @@ export default {
   imageError: 'Image Error',
   imageErrorDescription: 'Error inserting image',
   attention: 'Attention',
-  msgDeleteImg: 'Do you want to delete this image?',
+  msgDeleteImg: 'Do you want to delete this evidence?',
   yesDelete: 'Yes, delete',
   cancel: 'Cancel',
   noConnection: 'No connection. Using your current location.',
@@ -98,4 +98,11 @@ export default {
   developer: 'Developer',
   none: 'none',
   home: 'Sou ECO!',
+
+  insertEvidence: 'Insert evidence',
+  cancelButtonTitle: 'Cancel',
+  takePhotoButtonTitle: 'Open camera',
+  chooseFromLibraryButtonTitle: 'Gallery',
+  removeTitle: 'To remove',
+  viewTitle: 'To view',
 };

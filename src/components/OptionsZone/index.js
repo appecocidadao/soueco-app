@@ -3,6 +3,7 @@ import { View } from 'react-native';
 import colors from '~/styles/colors';
 
 import { Container, OptionContainer, Icon, OptionText } from './styles';
+import { translate } from '~/locales';
 
 const OptionsZone = ({ handleSelect }) => {
   const [isUrban, setIsUrban] = useState(true);
@@ -23,7 +24,7 @@ const OptionsZone = ({ handleSelect }) => {
           color={isUrban ? colors.white : colors.fontLight}
         />
 
-        <OptionText selected={isUrban}>Zona Urbana</OptionText>
+        <OptionText selected={isUrban}>{translate('urbanArea')}</OptionText>
       </OptionContainer>
       <OptionContainer
         selected={!isUrban}
@@ -37,7 +38,7 @@ const OptionsZone = ({ handleSelect }) => {
           size={24}
           color={!isUrban ? colors.white : colors.fontLight}
         />
-        <OptionText selected={!isUrban}>Zona Rural</OptionText>
+        <OptionText selected={!isUrban}>{translate('ruralArea')}</OptionText>
       </OptionContainer>
     </Container>
   );
