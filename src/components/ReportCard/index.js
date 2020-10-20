@@ -50,8 +50,6 @@ const styles = StyleSheet.create({
 });
 
 export default ({ code, type, timestamp, statusId, uri }) => {
-  console.log(uri);
-
   const videoRef = useRef(null);
 
   const [paused, setPaused] = useState(true);
