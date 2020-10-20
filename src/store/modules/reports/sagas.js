@@ -44,14 +44,14 @@ export function* sendReports() {
 
       report.append('name', info.name);
       report.append('email', info.email);
-      report.append('contact', info.phone);
+      report.append('contact', info.contact);
 
       report.append('urban', info.urban);
 
-      report.append('street', info.place);
-      report.append('district', info.zone);
+      report.append('street', info.street);
+      report.append('district', info.district);
       report.append('number', info.number);
-      report.append('zipcode', info.cep);
+      report.append('zipcode', info.zipcode);
       report.append('state', info.state);
       report.append('city', info.city);
       report.append('reference', info.reference);
@@ -61,9 +61,9 @@ export function* sendReports() {
 
       report.append('type', info.type);
       report.append('description', info.description);
-      report.append('file', info.image[0]);
-      report.append('file', info.image[1]);
-      report.append('file', info.image[2]);
+      report.append('file', info.medias[0]);
+      report.append('file', info.medias[1]);
+      report.append('file', info.medias[2]);
 
       const response = yield call(api.post, '/denunciations', report, {
         headers: {

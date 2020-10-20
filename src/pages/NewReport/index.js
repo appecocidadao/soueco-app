@@ -47,8 +47,6 @@ import Card from '~/components/Card';
 import ButtonIcon from '~/components/ButtonIcon';
 import Input from '~/components/Input';
 
-import Colors from '~/styles/colors';
-
 import api from '~/services/api';
 import Loading from '~/components/Loading';
 
@@ -260,267 +258,6 @@ function NewReport({ anonymous, navigation }) {
     });
   };
 
-  // const pushReportCode = async (code) => {
-  //   let codes = null;
-
-  //   const storedCodes = JSON.parse(await AsyncStorage.getItem('USER_REPORTS'));
-
-  //   storedCodes ? (codes = storedCodes) : (codes = []);
-
-  //   codes.push(code);
-
-  //   await AsyncStorage.setItem('USER_REPORTS', JSON.stringify(codes));
-  // };
-
-  const handleSubmit = async () => {
-    const {
-      name,
-      email,
-      contact,
-      urban,
-      street,
-      district,
-      number,
-      zipcode,
-      city,
-      state,
-      reference,
-      type,
-      description,
-      latitude,
-      longitude,
-    } = data;
-
-    if (!anonymous && (!email || !name || !contact)) {
-      Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
-      return;
-    }
-
-    if (urban && !number) {
-      const AsyncAlert = async () =>
-        new Promise((resolve) => {
-          Alert.alert(
-            translate('numberRequired'),
-            translate('setUnknownFild'),
-            [
-              {
-                text: translate('yes'),
-                onPress: async () => {
-                  resolve(true);
-                  setData((prevData) => ({
-                    ...prevData,
-                    number: translate('none'),
-                  }));
-                },
-              },
-              {
-                text: translate('no'),
-                onPress: () => {
-                  resolve(false);
-                },
-                style: 'cancel',
-              },
-            ]
-          );
-        });
-
-      const ans = await AsyncAlert();
-      if (!ans) {
-        return;
-      }
-    }
-
-    if (urban && (!street || !district || !zipcode || !number)) {
-      Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
-      return;
-    }
-
-    if (!city || !state) {
-      Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
-      return;
-    }
-
-    if (!type || !description) {
-      Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
-      return;
-    }
-
-    if (!medias[0] && !medias[1] && !medias[2]) {
-      Alert.alert(translate('incompleteReport'), translate('fillAllFields'));
-      return;
-    }
-
-    // if (
-    //   latitude &&
-    //   longitude &&
-    //   latitude !== '' &&
-    //   longitude !== '' &&
-    //   (city === '' || state === '')
-    // ) {
-    //   AddressByLocation({ latitude, longitude }).then((address) => {
-    //
-    //   });
-    // }
-
-    // eslint-disable-next-line no-empty
-    if (!latitude || !longitude || latitude === '' || longitude === '') {
-      Geolocation.getCurrentPosition(
-        async ({ coords: { latitude, longitude } }) => {
-          setData((prevData) => ({
-            ...prevData,
-            latitude,
-            longitude,
-          }));
-        },
-        (err) => {
-          Alert.alert(
-            translate('locationError'),
-            translate('checkConnectionGPS')
-          );
-          setLoading(false);
-          // closeModal();
-        },
-        {
-          timeout: 10000,
-          enableHighAccuracy: false,
-          maximumAge: 5000,
-        }
-      );
-
-      Alert.alert(translate('incompleteReport'), translate('failGetLocation'));
-      return;
-    }
-
-    try {
-      if (!network.isConnected) {
-        throw new Error('Fail');
-      }
-      setLoading(true);
-
-      const report = new FormData();
-
-      report.append('anonymous', anonymous);
-
-      if (!anonymous) {
-        report.append('name', name);
-        report.append('email', email);
-        report.append('contact', contact);
-      }
-
-      report.append('urban', urban);
-
-      report.append('street', street);
-      report.append('district', district);
-      report.append('number', number);
-      report.append('zipcode', zipcode);
-      report.append('state', state);
-      report.append('city', city);
-      report.append('reference', reference);
-      report.append('latitude', latitude);
-      report.append('longitude', longitude);
-      report.append('timestamp', new Date().toISOString());
-
-      report.append('type', type);
-      report.append('description', description);
-      report.append('file', medias[0]);
-      report.append('file', medias[1]);
-      report.append('file', medias[2]);
-
-      const response = await api.post('/denunciations', report);
-
-      // await pushReportCode(response.data.denunciation.code);
-
-      setData(initialData);
-      setMedias([null, null, null]);
-      setLoading(false);
-
-      Alert.alert(translate('reported'), translate('reportedDescription'));
-      dispatch(sendReportSuccess(response.data.denunciation));
-
-      navigation.navigate('Home');
-    } catch (err) {
-      setLoading(false);
-
-      Alert.alert(translate('errorSend'), translate('submitLater'), [
-        {
-          text: translate('yesSave'),
-          onPress: async () => {
-            setLoading(true);
-
-            const { mapVisible, activityIndicator, prevMedias, ...rest } = data;
-
-            rest.medias = medias;
-            rest.anonymous = anonymous;
-            rest.timestamp = new Date().toISOString();
-
-            setData(initialData);
-            setMedias([null, null, null]);
-            setErrorLocation(false);
-            setErrorsMedias([null, null, null]);
-
-            dispatch(addReport(rest));
-            navigation.navigate('Home');
-            setLoading(false);
-
-            // try {
-            //   const getArchived = JSON.parse(
-            //     await AsyncStorage.getItem('ARCHIVED_REPORTS')
-            //   );
-
-            //   if (getArchived) {
-            //     Alert.alert(
-            //       'Você já possui uma denúncia arquivada.',
-            //       'Deseja substituí-la?',
-            //       [
-            //         {
-            //           text: 'Sim',
-            //           onPress: async () => {
-            //             // await AsyncStorage.setItem(
-            //             //   'ARCHIVED_REPORTS',
-            //             //   JSON.stringify(rest)
-            //             // );
-            //             dispatch(addReport(rest));
-            //             navigation.navigate('Home');
-            //             setLoading(false);
-            //           },
-            //         },
-            //         {
-            //           text: 'Cancelar',
-            //           style: 'cancel',
-            //         },
-            //       ]
-            //     );
-            //   } else {
-            //     // await AsyncStorage.setItem(
-            //     //   'ARCHIVED_REPORTS',
-            //     //   JSON.stringify(rest)
-            //     // );
-            //     dispatch(addReport(rest));
-            //     navigation.navigate('Home');
-            //     setLoading(false);
-            //   }
-            // } catch (err) {
-            //   alert(err);
-            //   navigation.navigate('Home');
-            //   setLoading(false);
-            // }
-          },
-        },
-        {
-          text: translate('noDelete'),
-          onPress: () => {
-            setData(initialData);
-            setMedias([null, null, null]);
-            setErrorLocation(false);
-            setErrorsMedias([null, null, null]);
-            navigation.navigate('Home');
-          },
-          style: 'cancel',
-        },
-      ]);
-    }
-  };
-
   const deleteImage = (index) => {
     Alert.alert(translate('Attention'), translate('msgDeleteImg'), [
       {
@@ -585,9 +322,6 @@ function NewReport({ anonymous, navigation }) {
           deleteImage(index);
         }
       } else {
-        console.log(response);
-
-        console.log(response.type?.includes('image'));
         const tempPrevMedias = [...data.prevMedias];
 
         tempPrevMedias[index] = {
@@ -628,7 +362,7 @@ function NewReport({ anonymous, navigation }) {
           const video = {
             uri: response.uri,
             type: 'video/mp4',
-            name: `${prefix}-video`,
+            name: `${prefix}-video.mp4`,
           };
 
           const tempMedias = [...medias];
@@ -650,7 +384,6 @@ function NewReport({ anonymous, navigation }) {
         urban: isUrban,
         anonymous,
       };
-      console.log(allData);
 
       try {
         formRef.current?.setErrors({});
@@ -765,9 +498,8 @@ function NewReport({ anonymous, navigation }) {
         setLoading(false);
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
-          console.log(errors);
+
           formRef.current?.setErrors(errors);
-          console.log(formRef.current?.getErrors());
 
           setErrorsMedias([
             formRef.current?.getFieldError(`medias[0]`),
@@ -828,23 +560,18 @@ function NewReport({ anonymous, navigation }) {
             onPress: async () => {
               setLoading(true);
 
-              const {
-                mapVisible,
-                activityIndicator,
-                prevMedias,
-                ...rest
-              } = data;
-
-              rest.medias = medias;
-              rest.anonymous = anonymous;
-              rest.timestamp = new Date().toISOString();
+              const reportLater = {
+                ...allData,
+                medias,
+                timestamp: new Date().toISOString(),
+              };
 
               setData(initialData);
               setMedias([null, null, null]);
               setErrorLocation(false);
               setErrorsMedias([null, null, null]);
 
-              dispatch(addReport(rest));
+              dispatch(addReport(reportLater));
               navigation.navigate('Home');
               setLoading(false);
             },
@@ -1216,7 +943,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   formItem: {
-    backgroundColor: Colors.soft,
+    backgroundColor: colors.soft,
     borderRadius: 5,
     padding: 10,
     marginBottom: 10,
@@ -1259,7 +986,7 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
     borderWidth: 2,
-    borderColor: Colors.border,
+    borderColor: colors.border,
     marginBottom: 10,
     marginRight: 10,
     backgroundColor: '#04884E',

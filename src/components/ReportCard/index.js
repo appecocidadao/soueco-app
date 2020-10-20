@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { View, StyleSheet, Text, Image } from 'react-native';
 import moment from 'moment';
+import Video from 'react-native-video';
+
+import { TouchableOpacity } from 'react-native-gesture-handler';
 import { translate } from '~/locales';
 
 const statusCodes = ['Não Enviada', 'Recebida', 'Encaminhada', 'Finalizada'];
@@ -47,9 +50,40 @@ const styles = StyleSheet.create({
 });
 
 export default ({ code, type, timestamp, statusId, uri }) => {
+  console.log(uri);
+
+  const videoRef = useRef(null);
+
+  const [paused, setPaused] = useState(true);
+
   return (
     <View style={styles.container}>
-      <Image style={styles.image} source={{ uri }} />
+      {uri.endsWith('mp4') ? (
+        <TouchableOpacity
+          onPress={() => {
+            videoRef.current.seek(0);
+            videoRef.current.presentFullscreenPlayer();
+            setPaused(false);
+          }}
+        >
+          <Video
+            resizeMode="cover"
+            source={{ uri }} // Can be a URL or a local file.
+            ref={videoRef}
+            paused={paused}
+            onEnd={() => setPaused(true)}
+            // ref={(ref) => {
+            //   this.player = ref;
+            // }} // Store reference
+            // onBuffer={this.onBuffer} // Callback when remote video is buffering
+            // onError={this.videoError} // Callback when video cannot be loaded
+            style={styles.image}
+          />
+        </TouchableOpacity>
+      ) : (
+        <Image style={styles.image} source={{ uri }} />
+      )}
+
       <View style={styles.info}>
         <Text style={styles.header}>
           Código: {code || translate('reportNotSent')}
